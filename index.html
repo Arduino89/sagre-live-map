@@ -2,75 +2,640 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Sagre Live Map — test pubblicazione</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Sagre Live Map v0.6.3</title>
+  <link rel="preconnect" href="https://unpkg.com">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <style>
-    :root { color-scheme: light; --ink:#18231d; --muted:#65736a; --paper:#f6f2e9; --card:#fffdf8; --green:#1c6443; --line:#e2dbcd; }
-    * { box-sizing:border-box; }
-    body { margin:0; color:var(--ink); background:var(--paper); font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; }
-    main { width:min(1100px,100%); margin:auto; padding:18px; }
-    header { margin-bottom:14px; }
-    h1 { margin:0 0 7px; font-size:clamp(28px,6vw,46px); letter-spacing:-.04em; }
-    .status { display:inline-block; padding:7px 10px; border:1px solid #b9d7c7; border-radius:999px; color:var(--green); background:#edf7f1; font-size:12px; font-weight:800; }
-    .note { color:var(--muted); line-height:1.5; }
-    .layout { display:grid; grid-template-columns:minmax(300px,420px) 1fr; gap:16px; }
-    .card { overflow:hidden; border:1px solid var(--line); border-radius:22px; background:var(--card); box-shadow:0 14px 35px rgba(31,47,38,.10); }
-    .poster { display:block; width:100%; max-height:390px; object-fit:contain; background:#ece7dc; }
-    .body { padding:18px; }
-    h2 { margin:0 0 8px; font-size:25px; }
-    .meta { margin:0 0 12px; color:var(--muted); line-height:1.5; }
-    .actions { display:flex; flex-wrap:wrap; gap:9px; }
-    .actions a { display:inline-flex; padding:11px 14px; border-radius:12px; text-decoration:none; font-weight:800; }
-    .primary { color:white; background:var(--green); }
-    .secondary { color:var(--green); border:1px solid #b9d7c7; background:white; }
-    #map { min-height:570px; height:72vh; border-radius:22px; border:1px solid var(--line); }
-    .leaflet-popup-content { line-height:1.45; }
-    .leaflet-popup-content a { color:var(--green); font-weight:800; }
-    @media (max-width:760px) {
-      main { padding:12px; }
-      .layout { grid-template-columns:1fr; }
-      #map { min-height:390px; height:52vh; }
+    :root {
+      --ink: #18231d;
+      --muted: #66736a;
+      --paper: #f6f2e9;
+      --card: #fffdf8;
+      --line: #e2dbcd;
+      --green: #1c6443;
+      --green-2: #2f865d;
+      --orange: #d66a2b;
+      --sun: #f4c354;
+      --shadow: 0 16px 44px rgba(31, 47, 38, .12);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button, select { cursor: pointer; }
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(360px, 510px) 1fr;
+      min-height: 100vh;
+    }
+    .panel {
+      position: relative;
+      z-index: 4;
+      overflow-y: auto;
+      max-height: 100vh;
+      padding: 22px 22px 40px;
+      border-right: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(244,195,84,.23), transparent 31%),
+        var(--paper);
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: white;
+      border-radius: 14px;
+      background: var(--green);
+      box-shadow: 0 9px 22px rgba(28,100,67,.25);
+      font-size: 22px;
+    }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      color: var(--green);
+      border: 1px solid rgba(28,100,67,.18);
+      border-radius: 999px;
+      background: rgba(255,255,255,.7);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .live-badge i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #28a56b;
+      box-shadow: 0 0 0 4px rgba(40,165,107,.13);
+    }
+    h1 {
+      max-width: 430px;
+      margin: 0;
+      font-size: clamp(34px, 5vw, 52px);
+      line-height: .98;
+      letter-spacing: -.055em;
+    }
+    .intro {
+      max-width: 440px;
+      margin: 13px 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .notice {
+      margin: -4px 0 16px;
+      padding: 10px 12px;
+      color: #66542f;
+      border: 1px solid rgba(214,106,43,.18);
+      border-radius: 14px;
+      background: rgba(244,195,84,.17);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .scope-audit {
+      display: grid;
+      gap: 3px;
+      margin: -4px 0 16px;
+      padding: 11px 12px;
+      color: var(--green);
+      border: 1px solid rgba(28,100,67,.18);
+      border-radius: 14px;
+      background: rgba(226,239,231,.72);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    .scope-audit strong { font-size: 12px; }
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 10px 28px rgba(38,49,40,.06);
+      backdrop-filter: blur(12px);
+    }
+    .field { display: grid; gap: 6px; }
+    .field.zone { grid-column: 1 / -1; }
+    .field label {
+      padding-left: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    .control {
+      min-width: 0;
+      width: 100%;
+      padding: 11px 12px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      outline: none;
+      background: var(--card);
+      font-weight: 720;
+    }
+    .control:focus { border-color: var(--green-2); box-shadow: 0 0 0 3px rgba(47,134,93,.12); }
+    .filter-actions {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: 1fr auto;
+      gap: 9px;
+      margin-top: 2px;
+    }
+    .btn {
+      min-height: 43px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 13px;
+      font-weight: 850;
+    }
+    .btn-primary { color: white; background: var(--green); }
+    .btn-ghost { color: var(--green); background: #e6efe9; }
+    .helper {
+      grid-column: 1 / -1;
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: 9px;
+      margin: 14px 0;
+    }
+    .metric {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--card);
+    }
+    .metric strong { display: block; font-size: 22px; line-height: 1; letter-spacing: -.03em; }
+    .metric span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .result-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 18px 2px 10px;
+    }
+    .result-heading h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .result-heading span { color: var(--muted); font-size: 12px; }
+    .events { display: grid; gap: 10px; }
+    .event {
+      position: relative;
+      padding: 15px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: 0 8px 25px rgba(36,49,40,.055);
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .event:hover {
+      transform: translateY(-2px);
+      border-color: rgba(28,100,67,.35);
+      box-shadow: var(--shadow);
+    }
+    .event-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .event h3 { margin: 0; font-size: 17px; line-height: 1.16; letter-spacing: -.025em; }
+    .date-block {
+      flex: 0 0 52px;
+      padding: 7px 4px;
+      color: white;
+      border-radius: 13px;
+      background: var(--orange);
+      text-align: center;
+    }
+    .date-block strong { display: block; font-size: 20px; line-height: 1; }
+    .date-block span { font-size: 10px; font-weight: 900; text-transform: uppercase; }
+    .where { margin: 7px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .where b { color: var(--ink); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 11px 0; }
+    .chip {
+      padding: 5px 8px;
+      color: #4d5a51;
+      border-radius: 999px;
+      background: #efeae0;
+      font-size: 10px;
+      font-weight: 850;
+      text-transform: capitalize;
+    }
+    .chip.verified { color: var(--green); background: #e2efe7; }
+    .description { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.46; }
+    .links { display: flex; gap: 13px; margin-top: 12px; }
+    .links a { color: var(--green); font-size: 12px; font-weight: 850; text-decoration: none; }
+    .empty {
+      padding: 24px;
+      border: 1px dashed #cfc5b4;
+      border-radius: 20px;
+      background: rgba(255,255,255,.55);
+      text-align: center;
+    }
+    .empty strong { display: block; margin-bottom: 6px; }
+    .empty span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .monitoring { display: grid; gap: 8px; }
+    .watch-card {
+      padding: 13px 14px;
+      border: 1px solid rgba(214,106,43,.22);
+      border-radius: 17px;
+      background: rgba(255,250,237,.82);
+    }
+    .watch-card strong { display: block; font-size: 14px; }
+    .watch-card span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .watch-card a { display: inline-block; margin-top: 8px; color: var(--green); font-size: 11px; font-weight: 850; text-decoration: none; }
+    .map-wrap { position: sticky; top: 0; height: 100vh; background: #dce8df; }
+    #map { width: 100%; height: 100%; }
+    .map-overlay {
+      position: absolute;
+      z-index: 500;
+      top: 20px;
+      left: 20px;
+      max-width: min(390px, calc(100% - 40px));
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: 16px;
+      background: rgba(255,253,248,.9);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .map-overlay strong { display: block; font-size: 13px; }
+    .map-overlay span { color: var(--muted); font-size: 11px; }
+    .pin {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: white;
+      border: 4px solid white;
+      border-radius: 50% 50% 50% 12px;
+      background: var(--orange);
+      box-shadow: 0 7px 18px rgba(31,45,36,.3);
+      transform: rotate(-45deg);
+      font-size: 10px;
+      font-weight: 950;
+    }
+    .pin span { transform: rotate(45deg); }
+    .leaflet-popup-content-wrapper { border-radius: 16px; }
+    .popup { min-width: 220px; line-height: 1.4; }
+    .popup b { display: block; margin-bottom: 5px; font-size: 14px; }
+    .popup span { color: var(--muted); font-size: 12px; }
+    .popup a { display: inline-block; margin-top: 9px; color: var(--green); font-weight: 850; text-decoration: none; }
+    @media (max-width: 860px) {
+      .shell { display: flex; flex-direction: column; }
+      .panel {
+        order: 2;
+        overflow: visible;
+        max-height: none;
+        padding: 18px 15px calc(36px + env(safe-area-inset-bottom));
+        border: 0;
+      }
+      .map-wrap { order: 1; position: relative; height: 42vh; min-height: 310px; }
+      h1 { font-size: 39px; }
+      .brand-row { margin-bottom: 13px; }
+      .filters { border-radius: 18px; }
+      .map-overlay { top: 13px; left: 13px; max-width: calc(100% - 26px); }
+    }
+    @media (max-width: 430px) {
+      .filters { grid-template-columns: 1fr; }
+      .field, .field.zone, .filter-actions, .helper { grid-column: 1; }
+      .summary { grid-template-columns: repeat(3, 1fr); }
+      .metric { padding: 10px 8px; }
+      .metric strong { font-size: 19px; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <span class="status">TEST PUBBLICAZIONE AGGIORNATA</span>
-      <h1>Sagre Live Map</h1>
-      <p class="note">Questa pagina contiene soltanto l’evento usato per verificare il nuovo deploy. Il pulsante deve aprire direttamente la locandina e non Instagram.</p>
-    </header>
+  <div class="shell">
+    <section class="panel">
+      <div class="brand-row">
+        <div class="brand"><span class="brand-mark">⌖</span><span>Sagre Live Map</span></div>
+        <span class="live-badge"><i></i> v0.6.3 verificata</span>
+      </div>
+      <h1>Scopri cosa succede intorno a te.</h1>
+      <p class="intro">Scegli una zona e un intervallo. L'app mostra solo sagre, feste di paese o patronali, feste gastronomiche, fiere tradizionali e palii.</p>
+      <div class="notice">Mostre, letture, escursioni, concerti isolati e tornei sportivi non vengono più contati come sagre. Le ricorrenze senza una data 2026 verificata restano separate dalla mappa.</div>
+      <div class="scope-audit"><strong id="coverageSummary">Caricamento copertura…</strong><span>Filtri locali: nessuna chiamata Groq mentre scegli zona e date.</span></div>
 
-    <section class="layout">
-      <article class="card">
-        <a href="https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg" target="_blank" rel="noreferrer">
-          <img class="poster" src="https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg" alt="Locandina Festa AVIS San Martino dall'Argine 2026">
-        </a>
-        <div class="body">
-          <h2>Festa AVIS 2026</h2>
-          <p class="meta"><strong>San Martino dall’Argine</strong><br>25–27 luglio 2026<br>Area Feste, Piazza Castello</p>
-          <div class="actions">
-            <a class="primary" href="https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg" target="_blank" rel="noreferrer">Apri locandina ↗</a>
-            <a class="secondary" href="https://www.google.com/maps/search/?api=1&query=45.0978,10.518" target="_blank" rel="noreferrer">Centro del comune ↗</a>
-          </div>
+      <form class="filters" id="filters">
+        <div class="field zone">
+          <label for="zone">Zona</label>
+          <select class="control" id="zone">
+            <option value="all">Tutte le zone disponibili</option>
+          </select>
         </div>
-      </article>
-      <div id="map" aria-label="Mappa Festa AVIS San Martino dall'Argine"></div>
+        <div class="field">
+          <label for="from">Dal</label>
+          <input class="control" id="from" type="date" value="2026-07-18">
+        </div>
+        <div class="field">
+          <label for="to">Al</label>
+          <input class="control" id="to" type="date" value="2026-10-18">
+        </div>
+        <div class="field zone">
+          <label for="category">Tipo di evento</label>
+          <select class="control" id="category">
+            <option value="all">Tutti</option>
+            <option value="sagra">Sagre</option>
+            <option value="festa_paese">Feste di paese</option>
+            <option value="festa_patronale">Feste patronali</option>
+            <option value="festa_gastronomica">Feste gastronomiche</option>
+            <option value="fiera_tradizionale">Fiere tradizionali</option>
+            <option value="palio_rievocazione">Palii e rievocazioni</option>
+            <option value="avis">AVIS</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-primary" type="submit">Mostra eventi</button>
+          <button class="btn btn-ghost" id="reset" type="button">Reset</button>
+        </div>
+        <div class="helper" id="helper">Intervallo massimo: 92 giorni.</div>
+      </form>
+
+      <div class="summary">
+        <div class="metric"><strong id="eventCount">0</strong><span>eventi trovati</span></div>
+        <div class="metric"><strong id="townCount">0</strong><span>comuni</span></div>
+        <div class="metric"><strong id="sourceCount">0</strong><span>fonti ufficiali</span></div>
+      </div>
+
+      <div class="result-heading">
+        <h2>In programma</h2>
+        <span id="resultLabel">caricamento…</span>
+      </div>
+      <div class="events" id="events"></div>
+
+      <div class="result-heading">
+        <h2>Tradizioni monitorate</h2>
+        <span id="monitorLabel">data da confermare</span>
+      </div>
+      <div class="monitoring" id="monitoring"></div>
     </section>
-  </main>
+
+    <section class="map-wrap">
+      <div id="map" aria-label="Mappa degli eventi verificati"></div>
+      <div class="map-overlay">
+        <strong id="mapTitle">Tutte le zone</strong>
+        <span id="mapStatus">2 sagre e fiere confermate · dati aggiornati al 21 luglio 2026</span>
+      </div>
+    </section>
+  </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
-    const poster = "https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg";
-    const map = L.map("map").setView([45.0978, 10.518], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
-    L.marker([45.0978, 10.518]).addTo(map).bindPopup(
-      '<strong>Festa AVIS 2026</strong><br>25–27 luglio · Piazza Castello<br><a href="' + poster + '" target="_blank" rel="noreferrer">Apri locandina ↗</a>'
-    ).openPopup();
+    var zoneLabels = { all: "Tutte le zone" };
+    var zones = [];
+    var sourceCatalog = [];
+    var monthShort = ["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"];
+    var data = [];
+    var monitoring = [];
+    var categoryLabels = {
+      sagra: "sagra",
+      festa_paese: "festa di paese",
+      festa_patronale: "festa patronale",
+      festa_gastronomica: "festa gastronomica",
+      fiera_tradizionale: "fiera tradizionale",
+      palio_rievocazione: "palio / rievocazione"
+    };
+    var markerLayer;
+    var map;
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, function (char) {
+        return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[char];
+      });
+    }
+    function iso(value) { return new Date(value + "T12:00:00+02:00"); }
+    function overlaps(event, from, to) {
+      var intervals = event.date_intervals && event.date_intervals.length
+        ? event.date_intervals
+        : [{start_date:event.start_date, end_date:event.end_date}];
+      return intervals.some(function (interval) {
+        return iso(interval.start_date) <= iso(to) && iso(interval.end_date) >= iso(from);
+      });
+    }
+    function zoneMatches(event, zone) {
+      if (zone === "all") return true;
+      var selected = zones.find(function (item) { return item.id === zone; });
+      return !!selected && selected.municipalities.indexOf(event.municipality) >= 0;
+    }
+    function readableDate(event) {
+      var start = iso(event.start_date);
+      var end = iso(event.end_date);
+      var format = new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"long"});
+      return event.start_date === event.end_date ? format.format(start) : format.format(start) + " – " + format.format(end);
+    }
+    function verifiedDate(event) {
+      return new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"short"}).format(new Date(event.source.verified_at));
+    }
+    function directions(event) {
+      return "https://www.google.com/maps/search/?api=1&query=" + event.latitude + "," + event.longitude;
+    }
+    function locationLabel(event) {
+      if (event.location_precision === "municipality_centroid") {
+        return "Punto indicativo nel centro del comune";
+      }
+      if (event.location_precision === "venue_approximate") {
+        return "Posizione approssimativa della sede";
+      }
+      return "Sede verificata";
+    }
+    function resultSet() {
+      var zone = document.getElementById("zone").value;
+      var from = document.getElementById("from").value;
+      var to = document.getElementById("to").value;
+      var category = document.getElementById("category").value;
+      return data.filter(function (event) {
+        return zoneMatches(event, zone) && overlaps(event, from, to) && (category === "all" || event.category === category || (category === "avis" && (event.special_filters || []).indexOf("avis") >= 0));
+      }).sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
+    }
+    function monitoringSet(zone) {
+      return monitoring.filter(function (item) {
+        return zoneMatches(item, zone);
+      }).sort(function (a, b) {
+        return a.municipality.localeCompare(b.municipality) || a.title.localeCompare(b.title);
+      });
+    }
+    function validateWindow() {
+      var from = document.getElementById("from").value;
+      var to = document.getElementById("to").value;
+      var helper = document.getElementById("helper");
+      if (!from || !to || iso(to) < iso(from)) {
+        helper.textContent = "Controlla le date: la fine deve essere successiva all'inizio.";
+        return false;
+      }
+      var days = Math.round((iso(to) - iso(from)) / 86400000);
+      if (days > 92) {
+        helper.textContent = "Intervallo troppo ampio: massimo 92 giorni per mantenere la ricerca leggera.";
+        return false;
+      }
+      helper.textContent = "Filtri locali: 0 token e 0 chiamate Groq.";
+      return true;
+    }
+    function render() {
+      if (!validateWindow()) return;
+      var zone = document.getElementById("zone").value;
+      var results = resultSet();
+      var list = document.getElementById("events");
+      var towns = new Set(results.map(function (e) { return e.municipality; }));
+      var sources = new Set(results.map(function (e) { return e.source.name; }));
+      document.getElementById("eventCount").textContent = results.length;
+      document.getElementById("townCount").textContent = towns.size;
+      document.getElementById("sourceCount").textContent = sources.size;
+      document.getElementById("resultLabel").textContent = zoneLabels[zone];
+      document.getElementById("mapTitle").textContent = zoneLabels[zone];
+      document.getElementById("mapStatus").textContent = results.length + " sagre o fiere confermate · dati aggiornati al 21 luglio 2026";
+      list.innerHTML = "";
+
+      if (!results.length) {
+        list.innerHTML = '<div class="empty"><strong>Nessuna sagra con data confermata in questa selezione.</strong><span>Non inseriamo eventi generici per riempire la mappa. Controlla sotto le tradizioni già individuate ma ancora senza una data verificata.</span></div>';
+      } else {
+        results.forEach(function (event) {
+          var start = iso(event.start_date);
+          var card = document.createElement("article");
+          card.className = "event";
+          card.innerHTML =
+            '<div class="event-top"><div><h3>' + esc(event.title) + '</h3>' +
+            '<p class="where"><b>' + esc(event.municipality) + '</b> · ' + esc(event.venue) + '<br>' + esc(readableDate(event)) + ' · ' + esc(event.time_text || "Orario in fonte") + '<br>' + esc(locationLabel(event)) + '</p></div>' +
+            '<div class="date-block"><strong>' + start.getDate() + '</strong><span>' + monthShort[start.getMonth()] + '</span></div></div>' +
+            '<div class="chips"><span class="chip">' + esc(categoryLabels[event.category] || event.category) + '</span><span class="chip verified">✓ sagra verificata</span><span class="chip">agg. ' + esc(verifiedDate(event)) + '</span></div>' +
+            '<p class="description">' + esc(event.summary) + '</p>' +
+            '<div class="links">' + (event.source.primary_action_url ? '<a href="' + esc(event.source.primary_action_url) + '" target="_blank" rel="noreferrer">' + esc(event.source.primary_action_label || "Dettagli evento") + ' ↗</a>' : '<span class="link-unavailable">Link evento specifico non disponibile</span>') +
+            '<a href="' + directions(event) + '" target="_blank" rel="noreferrer">' + (event.location_precision === "municipality_centroid" ? "Centro del comune ↗" : "Indicazioni ↗") + '</a></div>';
+          card.addEventListener("click", function (clickEvent) {
+            if (clickEvent.target.tagName === "A") return;
+            focusEvent(event);
+          });
+          list.appendChild(card);
+        });
+      }
+      renderMonitoring(zone);
+      renderMap(results, zone);
+    }
+    function renderMonitoring(zone) {
+      var items = monitoringSet(zone);
+      var container = document.getElementById("monitoring");
+      document.getElementById("monitorLabel").textContent = items.length + " ricorrenze · fuori mappa finché manca la data";
+      container.innerHTML = "";
+      if (!items.length) {
+        container.innerHTML = '<div class="empty"><strong>Nessuna ricorrenza ancora catalogata.</strong><span>La fonte comunale o Pro Loco della zona entrerà nella prossima rotazione di ricerca.</span></div>';
+        return;
+      }
+      items.forEach(function (item) {
+        var card = document.createElement("article");
+        card.className = "watch-card";
+        card.innerHTML = '<strong>' + esc(item.title) + '</strong><span><b>' + esc(item.municipality) + '</b> · ' + esc(item.period_text) + '</span><a href="' + esc(item.source.url) + '" target="_blank" rel="noreferrer">Fonte di scoperta ↗</a>';
+        container.appendChild(card);
+      });
+    }
+    function popup(event) {
+      return '<div class="popup"><b>' + esc(event.title) + '</b><span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) + '</span><br><a href="' + esc(event.source.primary_action_url || event.source.url) + '" target="_blank" rel="noreferrer">' + esc(event.source.primary_action_label || "Fonte di verifica") + ' ↗</a></div>';
+    }
+    function focusEvent(event) {
+      map.setView([event.latitude, event.longitude], event.location_precision === "municipality_centroid" ? 12 : 14, {animate:true});
+      L.popup().setLatLng([event.latitude, event.longitude]).setContent(popup(event)).openOn(map);
+    }
+    function renderMap(results, zone) {
+      markerLayer.clearLayers();
+      var bounds = [];
+      results.forEach(function (event) {
+        var markerIcon = L.divIcon({
+          className: "",
+          html: '<div class="pin"><span>' + esc(event.category.slice(0,1).toUpperCase()) + '</span></div>',
+          iconSize: [34,34],
+          iconAnchor: [17,32]
+        });
+        L.marker([event.latitude, event.longitude], {icon:markerIcon}).addTo(markerLayer).bindPopup(popup(event));
+        bounds.push([event.latitude, event.longitude]);
+      });
+      if (bounds.length === 1) map.setView(bounds[0], 13);
+      else if (bounds.length > 1) map.fitBounds(bounds, {padding:[55,55], maxZoom:12});
+      else {
+        var selected = zones.find(function (item) { return item.id === zone; });
+        var center = selected ? [selected.center.latitude, selected.center.longitude] : [45.25,10.68];
+        map.setView(center, 10);
+      }
+    }
+    function initMap() {
+      map = L.map("map", {zoomControl:true}).setView([45.25,10.68], 10);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap"
+      }).addTo(map);
+      markerLayer = L.layerGroup().addTo(map);
+    }
+    function hydrateData(payloads) {
+      data = payloads[0].events || [];
+      monitoring = payloads[0].monitoring || [];
+      zones = payloads[1].zones || [];
+      sourceCatalog = payloads[1].sources || [];
+      var select = document.getElementById("zone");
+      zones.forEach(function (zone) {
+        zoneLabels[zone.id] = zone.label;
+        var option = document.createElement("option");
+        option.value = zone.id;
+        option.textContent = zone.label;
+        select.appendChild(option);
+      });
+      var municipalityNames = new Set();
+      zones.forEach(function (zone) {
+        zone.municipalities.forEach(function (name) { municipalityNames.add(name); });
+      });
+      document.getElementById("coverageSummary").textContent = municipalityNames.size + " comuni nel catalogo · tutti gli indici dovuti controllati senza token · massimo 2 analisi Groq per ciclo";
+      render();
+    }
+    function loadData() {
+      if (window.__SAGRE_EVENTS__ && window.__SAGRE_ZONES__) {
+        hydrateData([window.__SAGRE_EVENTS__, window.__SAGRE_ZONES__]);
+        return;
+      }
+      Promise.all([
+        fetch("events.json", {cache:"no-store"}),
+        fetch("zones.json", {cache:"no-store"})
+      ]).then(function (responses) {
+        if (!responses[0].ok || !responses[1].ok) throw new Error("dataset non disponibile");
+        return Promise.all(responses.map(function (response) { return response.json(); }));
+      }).then(hydrateData).catch(function () {
+        document.getElementById("events").innerHTML = '<div class="empty"><strong>Apri il prototipo tramite server locale.</strong><span>Il browser ha bloccato il caricamento di events.json da file://.</span></div>';
+      });
+    }
+    document.getElementById("filters").addEventListener("submit", function (event) { event.preventDefault(); render(); });
+    ["zone","from","to","category"].forEach(function (id) {
+      document.getElementById(id).addEventListener("change", render);
+    });
+    document.getElementById("reset").addEventListener("click", function () {
+      document.getElementById("zone").value = "all";
+      document.getElementById("from").value = "2026-07-16";
+      document.getElementById("to").value = "2026-08-31";
+      document.getElementById("category").value = "all";
+      render();
+    });
+    initMap();
+    loadData();
   </script>
 </body>
 </html>

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "publicationGateVersion": "0.6.5",
+  "status": "ready_for_deploy",
+  "parity": true,
+  "canonicalEventCount": 64,
+  "publicEventCount": 64,
+  "canonicalAsOf": "2026-07-21",
+  "publicAsOf": "2026-07-21",
+  "missingPublicEventIds": [],
+  "extraPublicEventIds": [],
+  "eventIdsSha256": "5d25cde81896a18f7fdd42ce093ef5e586ba64c24d5717803b1a2289a3a54cc1",
+  "publicEventIdsSha256": "5d25cde81896a18f7fdd42ce093ef5e586ba64c24d5717803b1a2289a3a54cc1",
+  "publicationContract": "Every canonical event ID must exist in the public map dataset, with no extra IDs and matching asOf."
+}
