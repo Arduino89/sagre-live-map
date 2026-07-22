@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Sagre Live Map v0.6.3</title>
+  <title>Sagre Live Map</title>
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <style>
@@ -335,7 +335,7 @@
     <section class="panel">
       <div class="brand-row">
         <div class="brand"><span class="brand-mark">⌖</span><span>Sagre Live Map</span></div>
-        <span class="live-badge"><i></i> v0.6.3 verificata</span>
+        <span class="live-badge"><i></i> mappa verificata</span>
       </div>
       <h1>Scopri cosa succede intorno a te.</h1>
       <p class="intro">Scegli una zona e un intervallo. L'app mostra solo sagre, feste di paese o patronali, feste gastronomiche, fiere tradizionali e palii.</p>
@@ -553,7 +553,7 @@
       });
     }
     function popup(event) {
-      return '<div class="popup"><b>' + esc(event.title) + '</b><span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) + '</span><br><a href="' + esc(event.source.primary_action_url || event.source.url) + '" target="_blank" rel="noreferrer">' + esc(event.source.primary_action_label || "Fonte di verifica") + ' ↗</a></div>';
+      return '<div class="popup"><b>' + esc(event.title) + '</b><span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) + '</span><br>' + (event.source.primary_action_url ? '<a href="' + esc(event.source.primary_action_url) + '" target="_blank" rel="noreferrer">' + esc(event.source.primary_action_label || "Dettagli evento") + ' ↗</a>' : '<span class="link-unavailable">Link evento specifico non disponibile</span>') + '</div>';
     }
     function focusEvent(event) {
       map.setView([event.latitude, event.longitude], event.location_precision === "municipality_centroid" ? 12 : 14, {animate:true});
@@ -605,7 +605,7 @@
       zones.forEach(function (zone) {
         zone.municipalities.forEach(function (name) { municipalityNames.add(name); });
       });
-      document.getElementById("coverageSummary").textContent = municipalityNames.size + " comuni nel catalogo · tutti gli indici dovuti controllati senza token · massimo 2 analisi Groq per ciclo";
+      document.getElementById("coverageSummary").textContent = municipalityNames.size + " comuni nelle zone configurate · filtri locali senza chiamate esterne";
       render();
     }
     function loadData() {
