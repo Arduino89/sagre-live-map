@@ -2273,9 +2273,9 @@
       },
       "source": {
         "name": "Eventi e Sagre — Locandina Moglia Beer Fest 2026",
-        "url": "https://www.eventiesagre.it/Eventi_Feste/21194386_La+Festa+Della+Birra+A+Moglia.html",
+        "url": "https://www.eventiesagre.it/eventi/21194386/img/La_Festa_Della_Birra_A_Moglia%281%29.jpg",
         "event_page_url": "https://www.eventiesagre.it/Eventi_Feste/21194386_La+Festa+Della+Birra+A+Moglia.html",
-        "poster_url": "https://www.eventiesagre.it/sito/thumb.php?height=500&path=..%2Feventi%2F21194386%2Fimg%2FLa_Festa_Della_Birra_A_Moglia%281%29.jpg&width=500",
+        "poster_url": "https://www.eventiesagre.it/eventi/21194386/img/La_Festa_Della_Birra_A_Moglia%281%29.jpg",
         "type": "event_specific_poster",
         "verified_at": "2026-07-19T10:30:00+02:00",
         "http_status": 200,
@@ -2284,13 +2284,13 @@
         "date_match": true,
         "verified_by": "Cama Enterprise primary-source review",
         "evidence_note": "Locandina del canale Moglia Beer Fest: 31 luglio–4 agosto 2026; indice eventi del Comune riporta l'edizione 2026 e la sede Teatro Mondo 3.",
-        "public_link_evidence_note": "Pagina evento specifica aggiornata il 3 luglio 2026: Moglia Beer Fest, quarta edizione, 31 luglio–4 agosto 2026, con locandina immagine. Il post Instagram dell'organizzatore resta fonte di verifica interna.",
+        "public_link_evidence_note": "Pagina evento specifica aggiornata il 3 luglio 2026: Moglia Beer Fest, quarta edizione, 31 luglio–4 agosto 2026. Il pulsante pubblico usa il file JPG sottostante alla locandina; la pagina Eventi e Sagre e il post Instagram restano fonti di verifica interna.",
         "catalog_url": "https://www.instagram.com/p/DaxixoZMozj/",
-        "preferred_url": "https://www.eventiesagre.it/Eventi_Feste/21194386_La+Festa+Della+Birra+A+Moglia.html",
-        "primary_action_url": "https://www.eventiesagre.it/Eventi_Feste/21194386_La+Festa+Della+Birra+A+Moglia.html",
+        "preferred_url": "https://www.eventiesagre.it/eventi/21194386/img/La_Festa_Della_Birra_A_Moglia%281%29.jpg",
+        "primary_action_url": "https://www.eventiesagre.it/eventi/21194386/img/La_Festa_Della_Birra_A_Moglia%281%29.jpg",
         "has_public_action": true,
-        "primary_action_label": "Dettagli evento",
-        "has_direct_poster": false
+        "primary_action_label": "Apri locandina",
+        "has_direct_poster": true
       },
       "verification_status": "verified",
       "event_status": "confirmed"
