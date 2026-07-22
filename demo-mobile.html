@@ -10,5 +10,67 @@
 </head>
 <body>
   <p>La versione mobile è ora integrata nella mappa principale. <a href="./">Apri Sagre Live Map</a>.</p>
+<!-- SAGRE_PUBLIC_ACTIONS_V2_START -->
+<script id="sagre-public-actions-v2">
+(function () {
+  function externalLink(url, label) {
+    return '<a href="' + esc(url) + '" target="_blank" rel="noreferrer">' + label + ' ↗</a>';
+  }
+
+  function actionLinks(event) {
+    var source = event.source || {};
+    var parts = [];
+    if (source.public_poster_url) {
+      parts.push(externalLink(source.public_poster_url, "Locandina"));
+    }
+    if (source.public_event_page_url && source.public_event_page_url !== source.public_poster_url) {
+      parts.push(externalLink(source.public_event_page_url, "Dettagli evento"));
+    }
+    if (source.public_directions_url) {
+      parts.push(externalLink(source.public_directions_url, "Indicazioni"));
+    }
+    return parts.length
+      ? parts.join("")
+      : '<span class="link-unavailable">Collegamenti pubblici non disponibili</span>';
+  }
+
+  function decorateCards() {
+    if (typeof resultSet !== "function") return;
+    var results = resultSet();
+    var cards = document.querySelectorAll("#events .event");
+    cards.forEach(function (card, index) {
+      var event = results[index];
+      var links = card.querySelector(".links");
+      if (!event || !links) return;
+      var source = event.source || {};
+      var signature = [
+        source.public_poster_url || "",
+        source.public_event_page_url || "",
+        source.public_directions_url || ""
+      ].join("|");
+      if (links.dataset.actionsV2 === signature) return;
+      links.dataset.actionsV2 = signature;
+      links.innerHTML = actionLinks(event);
+    });
+  }
+
+  if (typeof popup === "function") {
+    popup = function (event) {
+      return '<div class="popup"><b>' + esc(event.title) + '</b><span>' +
+        esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' +
+        esc(event.venue) + '<br>' + esc(locationLabel(event)) +
+        '</span><br><div class="links">' + actionLinks(event) + '</div></div>';
+    };
+  }
+
+  var eventList = document.getElementById("events");
+  if (eventList) {
+    new MutationObserver(decorateCards).observe(eventList, {childList:true, subtree:true});
+  }
+  document.addEventListener("DOMContentLoaded", decorateCards);
+  setTimeout(decorateCards, 0);
+})();
+</script>
+<!-- SAGRE_PUBLIC_ACTIONS_V2_END -->
 </body>
 </html>

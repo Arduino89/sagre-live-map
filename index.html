@@ -453,7 +453,26 @@
       return new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"short"}).format(new Date(event.source.verified_at));
     }
     function directions(event) {
-      return "https://www.google.com/maps/search/?api=1&query=" + event.latitude + "," + event.longitude;
+      return (event.source && event.source.public_directions_url) || "";
+    }
+    function publicActionLinks(event) {
+      var source = event.source || {};
+      var parts = [];
+      function link(url, label) {
+        return '<a href="' + esc(url) + '" target="_blank" rel="noreferrer">' + label + ' ↗</a>';
+      }
+      if (source.public_poster_url) {
+        parts.push(link(source.public_poster_url, "Locandina"));
+      }
+      if (source.public_event_page_url && source.public_event_page_url !== source.public_poster_url) {
+        parts.push(link(source.public_event_page_url, "Dettagli evento"));
+      }
+      if (source.public_directions_url) {
+        parts.push(link(source.public_directions_url, "Indicazioni"));
+      }
+      return parts.length
+        ? parts.join("")
+        : '<span class="link-unavailable">Collegamenti pubblici non disponibili</span>';
     }
     function locationLabel(event) {
       if (event.location_precision === "municipality_centroid") {
@@ -524,8 +543,7 @@
             '<div class="date-block"><strong>' + start.getDate() + '</strong><span>' + monthShort[start.getMonth()] + '</span></div></div>' +
             '<div class="chips"><span class="chip">' + esc(categoryLabels[event.category] || event.category) + '</span><span class="chip verified">✓ sagra verificata</span><span class="chip">agg. ' + esc(verifiedDate(event)) + '</span></div>' +
             '<p class="description">' + esc(event.summary) + '</p>' +
-            '<div class="links">' + (event.source.primary_action_url ? '<a href="' + esc(event.source.primary_action_url) + '" target="_blank" rel="noreferrer">' + esc(event.source.primary_action_label || "Dettagli evento") + ' ↗</a>' : '<span class="link-unavailable">Link evento specifico non disponibile</span>') +
-            '<a href="' + directions(event) + '" target="_blank" rel="noreferrer">' + (event.location_precision === "municipality_centroid" ? "Centro del comune ↗" : "Indicazioni ↗") + '</a></div>';
+            '<div class="links">' + publicActionLinks(event) + '</div>';
           card.addEventListener("click", function (clickEvent) {
             if (clickEvent.target.tagName === "A") return;
             focusEvent(event);
@@ -553,7 +571,7 @@
       });
     }
     function popup(event) {
-      return '<div class="popup"><b>' + esc(event.title) + '</b><span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) + '</span><br>' + (event.source.primary_action_url ? '<a href="' + esc(event.source.primary_action_url) + '" target="_blank" rel="noreferrer">' + esc(event.source.primary_action_label || "Dettagli evento") + ' ↗</a>' : '<span class="link-unavailable">Link evento specifico non disponibile</span>') + '</div>';
+      return '<div class="popup"><b>' + esc(event.title) + '</b><span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) + '</span><br><div class="links">' + publicActionLinks(event) + '</div></div>';
     }
     function focusEvent(event) {
       map.setView([event.latitude, event.longitude], event.location_precision === "municipality_centroid" ? 12 : 14, {animate:true});
