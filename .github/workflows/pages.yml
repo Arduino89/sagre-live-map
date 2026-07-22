@@ -44,3 +44,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+# Source enabled on 2026-07-22; this commit triggers the first active deployment.
