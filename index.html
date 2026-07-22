@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sagre Live Map — test pubblicazione</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <style>
+    :root { color-scheme: light; --ink:#18231d; --muted:#65736a; --paper:#f6f2e9; --card:#fffdf8; --green:#1c6443; --line:#e2dbcd; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { width:min(1100px,100%); margin:auto; padding:18px; }
+    header { margin-bottom:14px; }
+    h1 { margin:0 0 7px; font-size:clamp(28px,6vw,46px); letter-spacing:-.04em; }
+    .status { display:inline-block; padding:7px 10px; border:1px solid #b9d7c7; border-radius:999px; color:var(--green); background:#edf7f1; font-size:12px; font-weight:800; }
+    .note { color:var(--muted); line-height:1.5; }
+    .layout { display:grid; grid-template-columns:minmax(300px,420px) 1fr; gap:16px; }
+    .card { overflow:hidden; border:1px solid var(--line); border-radius:22px; background:var(--card); box-shadow:0 14px 35px rgba(31,47,38,.10); }
+    .poster { display:block; width:100%; max-height:390px; object-fit:contain; background:#ece7dc; }
+    .body { padding:18px; }
+    h2 { margin:0 0 8px; font-size:25px; }
+    .meta { margin:0 0 12px; color:var(--muted); line-height:1.5; }
+    .actions { display:flex; flex-wrap:wrap; gap:9px; }
+    .actions a { display:inline-flex; padding:11px 14px; border-radius:12px; text-decoration:none; font-weight:800; }
+    .primary { color:white; background:var(--green); }
+    .secondary { color:var(--green); border:1px solid #b9d7c7; background:white; }
+    #map { min-height:570px; height:72vh; border-radius:22px; border:1px solid var(--line); }
+    .leaflet-popup-content { line-height:1.45; }
+    .leaflet-popup-content a { color:var(--green); font-weight:800; }
+    @media (max-width:760px) {
+      main { padding:12px; }
+      .layout { grid-template-columns:1fr; }
+      #map { min-height:390px; height:52vh; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <span class="status">TEST PUBBLICAZIONE AGGIORNATA</span>
+      <h1>Sagre Live Map</h1>
+      <p class="note">Questa pagina contiene soltanto l’evento usato per verificare il nuovo deploy. Il pulsante deve aprire direttamente la locandina e non Instagram.</p>
+    </header>
+
+    <section class="layout">
+      <article class="card">
+        <a href="https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg" target="_blank" rel="noreferrer">
+          <img class="poster" src="https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg" alt="Locandina Festa AVIS San Martino dall'Argine 2026">
+        </a>
+        <div class="body">
+          <h2>Festa AVIS 2026</h2>
+          <p class="meta"><strong>San Martino dall’Argine</strong><br>25–27 luglio 2026<br>Area Feste, Piazza Castello</p>
+          <div class="actions">
+            <a class="primary" href="https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg" target="_blank" rel="noreferrer">Apri locandina ↗</a>
+            <a class="secondary" href="https://www.google.com/maps/search/?api=1&query=45.0978,10.518" target="_blank" rel="noreferrer">Centro del comune ↗</a>
+          </div>
+        </div>
+      </article>
+      <div id="map" aria-label="Mappa Festa AVIS San Martino dall'Argine"></div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    const poster = "https://www.mantovanotizie.com/wp-content/uploads/festa-avis-san-martino-argine-2026.jpg";
+    const map = L.map("map").setView([45.0978, 10.518], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(map);
+    L.marker([45.0978, 10.518]).addTo(map).bindPopup(
+      '<strong>Festa AVIS 2026</strong><br>25–27 luglio · Piazza Castello<br><a href="' + poster + '" target="_blank" rel="noreferrer">Apri locandina ↗</a>'
+    ).openPopup();
+  </script>
+</body>
+</html>
