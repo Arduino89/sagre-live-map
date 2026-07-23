@@ -1,15 +1,34 @@
 {
-  "schemaVersion": 1,
-  "publicationGateVersion": "0.6.5",
+  "schemaVersion": 2,
+  "publicationGateVersion": "0.7.0",
   "status": "ready_for_deploy",
   "parity": true,
   "canonicalEventCount": 64,
   "publicEventCount": 64,
-  "canonicalAsOf": "2026-07-21",
-  "publicAsOf": "2026-07-21",
+  "canonicalAsOf": "2026-07-23",
+  "publicAsOf": "2026-07-23",
   "missingPublicEventIds": [],
   "extraPublicEventIds": [],
   "eventIdsSha256": "5d25cde81896a18f7fdd42ce093ef5e586ba64c24d5717803b1a2289a3a54cc1",
   "publicEventIdsSha256": "5d25cde81896a18f7fdd42ce093ef5e586ba64c24d5717803b1a2289a3a54cc1",
-  "publicationContract": "Every canonical event ID must exist in the public map dataset, with no extra IDs and matching asOf."
+  "bundleFiles": {
+    "events.json": {
+      "sha256": "fb53caab594b65c0026ecaf8cd3d494edfc359ed4dd4ca7f8a2f2234a8538afa",
+      "sizeBytes": 198471
+    },
+    "index.html": {
+      "sha256": "e94ae17753e2a21ba548c663640e1a4403f68bd88187160449fdc348bf4e889f",
+      "sizeBytes": 26390
+    },
+    "demo-mobile.html": {
+      "sha256": "53014231829be6aead52ba53da0a8b45b7ae71b652d87da13aa50ebf38f23148",
+      "sizeBytes": 441
+    },
+    "zones.json": {
+      "sha256": "1af703bd6ff2e44fa6ec57e4b9a56fe98964faba3c92be54815af3210ea4b6e8",
+      "sizeBytes": 1883
+    }
+  },
+  "bundleFileCount": 4,
+  "publicationContract": "Every canonical event ID must exist in the public dataset, with no extras, matching asOf, and byte-level SHA-256 fingerprints for every approved bundle file."
 }
