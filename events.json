@@ -2178,16 +2178,16 @@
         "date_match": true,
         "verified_by": "Cama Enterprise candidate closure review",
         "evidence_note": "MantovaNotizie, 20-07-2026: scheda specifica e locandina 2026, 25-26-27-28 luglio, San Giacomo Po di Bagnolo San Vito. Radio Pico: 25–28 luglio, quattro serate di musica, spettacoli e gastronomia. Maurizio Medeo: Sagra di San Giacomo Po il 27 luglio 2026.",
-        "public_poster_url": "https://www.mantovanotizie.com/wp-content/uploads/sagra-san-giacomo-po-2026-220x162.jpg",
+        "public_poster_url": null,
         "public_event_page_url": "https://www.mantovanotizie.com/feste-sagre/20260720-sagra-di-san-giacomo-po-mn-2026.php",
         "public_directions_url": null,
-        "has_direct_poster": true,
+        "has_direct_poster": false,
         "has_event_details": true,
         "has_verified_directions": false,
-        "primary_action_url": "https://www.mantovanotizie.com/wp-content/uploads/sagra-san-giacomo-po-2026-220x162.jpg",
-        "primary_action_label": "Apri locandina",
+        "primary_action_url": "https://www.mantovanotizie.com/feste-sagre/20260720-sagra-di-san-giacomo-po-mn-2026.php",
+        "primary_action_label": "Dettagli evento",
         "has_public_action": true,
-        "preferred_url": "https://www.mantovanotizie.com/wp-content/uploads/sagra-san-giacomo-po-2026-220x162.jpg"
+        "preferred_url": "https://www.mantovanotizie.com/feste-sagre/20260720-sagra-di-san-giacomo-po-mn-2026.php"
       },
       "verification_status": "verified",
       "event_status": "confirmed"
@@ -2237,16 +2237,16 @@
         "date_match": true,
         "verified_by": "Cama Enterprise P0 closure review",
         "evidence_note": "Locandina 2026: 30 luglio–3 agosto, stand gastronomico dalle 19:30 e serata musicale dalle 21:30. MantovaNotizie: pagina specifica pubblicata 20 luglio 2026. Alinere: 33ª Festa da Saltarel a Barbassolo il 30 luglio 2026.",
-        "public_poster_url": "https://www.mantovanotizie.com/wp-content/uploads/festa-saltarel-barbassolo-2026-220x162.jpg",
+        "public_poster_url": null,
         "public_event_page_url": "https://www.mantovanotizie.com/feste-sagre/20260720-festa-del-saltarel-2026-a-barbassolo-di-roncoferraro-mn.php",
         "public_directions_url": null,
-        "has_direct_poster": true,
+        "has_direct_poster": false,
         "has_event_details": true,
         "has_verified_directions": false,
-        "primary_action_url": "https://www.mantovanotizie.com/wp-content/uploads/festa-saltarel-barbassolo-2026-220x162.jpg",
-        "primary_action_label": "Apri locandina",
+        "primary_action_url": "https://www.mantovanotizie.com/feste-sagre/20260720-festa-del-saltarel-2026-a-barbassolo-di-roncoferraro-mn.php",
+        "primary_action_label": "Dettagli evento",
         "has_public_action": true,
-        "preferred_url": "https://www.mantovanotizie.com/wp-content/uploads/festa-saltarel-barbassolo-2026-220x162.jpg"
+        "preferred_url": "https://www.mantovanotizie.com/feste-sagre/20260720-festa-del-saltarel-2026-a-barbassolo-di-roncoferraro-mn.php"
       },
       "verification_status": "verified",
       "event_status": "confirmed"
