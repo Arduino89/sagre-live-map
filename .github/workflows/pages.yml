@@ -31,16 +31,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate public bundle
+      - name: Validate complete public bundle
         run: |
-          test -s index.html
-          test -s events.json
-          test -s zones.json
+          for name in index.html demo-mobile.html events.json zones.json publication_manifest.json; do
+            test -s "${name}"
+          done
           python -m json.tool events.json >/dev/null
           python -m json.tool zones.json >/dev/null
-          if [ -f publication_manifest.json ]; then
-            python -m json.tool publication_manifest.json >/dev/null
-          fi
+          python -m json.tool publication_manifest.json >/dev/null
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("publication_manifest.json").read_text(encoding="utf-8"))
+          expected = manifest.get("bundleFiles") or {}
+          required = {"index.html", "demo-mobile.html", "events.json", "zones.json"}
+          if set(expected) != required:
+              raise SystemExit(f"Unexpected bundle manifest files: {sorted(expected)}")
+          for name, metadata in expected.items():
+              data = Path(name).read_bytes()
+              actual = hashlib.sha256(data).hexdigest()
+              if actual != metadata.get("sha256") or len(data) != metadata.get("sizeBytes"):
+                  raise SystemExit(f"Bundle digest mismatch before deploy: {name}")
+          print("Complete repository bundle matches publication manifest.")
+          PY
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -49,10 +64,10 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/index.html
+          cp demo-mobile.html _site/demo-mobile.html
           cp events.json _site/events.json
           cp zones.json _site/zones.json
-          if [ -f demo-mobile.html ]; then cp demo-mobile.html _site/demo-mobile.html; fi
-          if [ -f publication_manifest.json ]; then cp publication_manifest.json _site/publication_manifest.json; fi
+          cp publication_manifest.json _site/publication_manifest.json
           touch _site/.nojekyll
 
       - name: Upload Pages artifact
@@ -64,21 +79,31 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify deployed bundle is current
+      - name: Verify every deployed file is current
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -euo pipefail
+          files=(index.html demo-mobile.html events.json zones.json publication_manifest.json)
           for attempt in {1..12}; do
-            curl --fail --silent --show-error --location \
-              "${PAGE_URL%/}/events.json" \
-              --output /tmp/live-events.json || true
-            if [ -s /tmp/live-events.json ] && cmp --silent events.json /tmp/live-events.json; then
-              echo "Deployed events.json matches the repository bundle."
+            all_match=true
+            for name in "${files[@]}"; do
+              live="/tmp/live-${name}"
+              rm -f "${live}"
+              curl --fail --silent --show-error --location \
+                "${PAGE_URL%/}/${name}?commit=${GITHUB_SHA}" \
+                --output "${live}" || true
+              if [ ! -s "${live}" ] || ! cmp --silent "${name}" "${live}"; then
+                all_match=false
+                break
+              fi
+            done
+            if [ "${all_match}" = true ]; then
+              echo "Every deployed file matches the repository bundle."
               exit 0
             fi
-            echo "Published bundle not visible yet (attempt ${attempt}/12); waiting for Pages propagation."
+            echo "Complete bundle not visible yet (attempt ${attempt}/12); waiting for Pages propagation."
             sleep 5
           done
-          echo "GitHub Pages is not serving the exact events.json from this commit."
+          echo "GitHub Pages is not serving the exact complete bundle from this commit."
           exit 1
