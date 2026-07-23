@@ -63,3 +63,22 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify deployed bundle is current
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            curl --fail --silent --show-error --location \
+              "${PAGE_URL%/}/events.json" \
+              --output /tmp/live-events.json || true
+            if [ -s /tmp/live-events.json ] && cmp --silent events.json /tmp/live-events.json; then
+              echo "Deployed events.json matches the repository bundle."
+              exit 0
+            fi
+            echo "Published bundle not visible yet (attempt ${attempt}/12); waiting for Pages propagation."
+            sleep 5
+          done
+          echo "GitHub Pages is not serving the exact events.json from this commit."
+          exit 1
