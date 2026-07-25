@@ -141,6 +141,10 @@
     }
     .field { display: grid; gap: 6px; }
     .field.zone { grid-column: 1 / -1; }
+    .field.search {
+      position: relative;
+      grid-column: 1 / -1;
+    }
     .field label {
       padding-left: 2px;
       color: var(--muted);
@@ -161,6 +165,64 @@
       font-weight: 720;
     }
     .control:focus { border-color: var(--green-2); box-shadow: 0 0 0 3px rgba(47,134,93,.12); }
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+    .search-control {
+      padding-left: 42px;
+      background:
+        linear-gradient(90deg, transparent 40px, var(--line) 40px, var(--line) 41px, transparent 41px),
+        var(--card);
+    }
+    .search-icon {
+      position: absolute;
+      z-index: 2;
+      top: 35px;
+      left: 14px;
+      color: var(--green);
+      pointer-events: none;
+    }
+    .locate-btn {
+      min-width: 47px;
+      padding: 0 13px;
+      color: var(--green);
+      border: 1px solid rgba(28,100,67,.2);
+      border-radius: 13px;
+      background: #e6efe9;
+      font-size: 19px;
+      font-weight: 900;
+    }
+    .locate-btn:hover { background: #dcebe2; }
+    .suggestions {
+      position: absolute;
+      z-index: 1000;
+      top: calc(100% + 5px);
+      left: 0;
+      right: 55px;
+      display: none;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .suggestions.open { display: block; }
+    .suggestion {
+      display: grid;
+      width: 100%;
+      padding: 10px 12px;
+      color: var(--ink);
+      border: 0;
+      border-bottom: 1px solid #eee8dc;
+      background: transparent;
+      text-align: left;
+    }
+    .suggestion:last-child { border-bottom: 0; }
+    .suggestion:hover, .suggestion:focus { background: #edf5f0; outline: none; }
+    .suggestion strong { font-size: 13px; }
+    .suggestion span { margin-top: 2px; color: var(--muted); font-size: 11px; }
     .filter-actions {
       display: grid;
       grid-column: 1 / -1;
@@ -338,15 +400,28 @@
         <span class="live-badge"><i></i> mappa verificata</span>
       </div>
       <h1>Scopri cosa succede intorno a te.</h1>
-      <p class="intro">Scegli una zona e un intervallo. L'app mostra solo sagre, feste di paese o patronali, feste gastronomiche, fiere tradizionali e palii.</p>
+      <p class="intro">Scegli un punto di partenza e quanto vuoi spostarti. Puoi cercare una località, un evento oppure usare la tua posizione reale.</p>
       <div class="notice">Mostre, letture, escursioni, concerti isolati e tornei sportivi non vengono più contati come sagre. Le ricorrenze senza una data 2026 verificata restano separate dalla mappa.</div>
-      <div class="scope-audit"><strong id="coverageSummary">Caricamento copertura…</strong><span>Filtri locali: nessuna chiamata Groq mentre scegli zona e date.</span></div>
+      <div class="scope-audit"><strong id="coverageSummary">Caricamento copertura…</strong><span>La mappa mostra soltanto gli eventi dentro il raggio scelto.</span></div>
 
       <form class="filters" id="filters">
-        <div class="field zone">
-          <label for="zone">Zona</label>
-          <select class="control" id="zone">
-            <option value="all">Tutte le zone disponibili</option>
+        <div class="field search">
+          <label for="placeSearch">Da dove vuoi partire?</label>
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <div class="search-row">
+            <input class="control search-control" id="placeSearch" type="search" value="Mantova" placeholder="Località o nome dell'evento" autocomplete="off" aria-autocomplete="list" aria-controls="searchSuggestions">
+            <button class="locate-btn" id="locate" type="button" title="Usa la mia posizione" aria-label="Usa la mia posizione">◎</button>
+          </div>
+          <div class="suggestions" id="searchSuggestions" role="listbox"></div>
+        </div>
+        <div class="field">
+          <label for="radius">Distanza massima</label>
+          <select class="control" id="radius">
+            <option value="5">5 km</option>
+            <option value="10">10 km</option>
+            <option value="20">20 km</option>
+            <option value="30" selected>30 km</option>
+            <option value="50">50 km</option>
           </select>
         </div>
         <div class="field">
@@ -357,7 +432,7 @@
           <label for="to">Al</label>
           <input class="control" id="to" type="date" value="2026-10-18">
         </div>
-        <div class="field zone">
+        <div class="field">
           <label for="category">Tipo di evento</label>
           <select class="control" id="category">
             <option value="all">Tutti</option>
@@ -374,7 +449,7 @@
           <button class="btn btn-primary" type="submit">Mostra eventi</button>
           <button class="btn btn-ghost" id="reset" type="button">Reset</button>
         </div>
-        <div class="helper" id="helper">Intervallo massimo: 92 giorni.</div>
+        <div class="helper" id="helper">Mantova · entro 30 km · intervallo massimo 92 giorni.</div>
       </form>
 
       <div class="summary">
@@ -422,7 +497,15 @@
       palio_rievocazione: "palio / rievocazione"
     };
     var markerLayer;
+    var radiusLayer;
     var map;
+    var searchReference = {
+      latitude: 45.1564,
+      longitude: 10.7914,
+      label: "Mantova",
+      type: "place"
+    };
+    var locationItems = [];
 
     function esc(value) {
       return String(value).replace(/[&<>"']/g, function (char) {
@@ -438,10 +521,36 @@
         return iso(interval.start_date) <= iso(to) && iso(interval.end_date) >= iso(from);
       });
     }
-    function zoneMatches(event, zone) {
-      if (zone === "all") return true;
-      var selected = zones.find(function (item) { return item.id === zone; });
-      return !!selected && selected.municipalities.indexOf(event.municipality) >= 0;
+    function normalizedSearch(value) {
+      return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+    function distanceKm(latitudeA, longitudeA, latitudeB, longitudeB) {
+      var radians = Math.PI / 180;
+      var deltaLatitude = (latitudeB - latitudeA) * radians;
+      var deltaLongitude = (longitudeB - longitudeA) * radians;
+      var a = Math.sin(deltaLatitude / 2) * Math.sin(deltaLatitude / 2) +
+        Math.cos(latitudeA * radians) * Math.cos(latitudeB * radians) *
+        Math.sin(deltaLongitude / 2) * Math.sin(deltaLongitude / 2);
+      return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    function selectedRadius() {
+      return Number(document.getElementById("radius").value);
+    }
+    function withinSelectedRadius(latitude, longitude) {
+      return distanceKm(
+        searchReference.latitude,
+        searchReference.longitude,
+        Number(latitude),
+        Number(longitude)
+      ) <= selectedRadius();
+    }
+    function eventMatchesNonGeographicFilters(event) {
+      var from = document.getElementById("from").value;
+      var to = document.getElementById("to").value;
+      var category = document.getElementById("category").value;
+      return overlaps(event, from, to) &&
+        (category === "all" || event.category === category ||
+          (category === "avis" && (event.special_filters || []).indexOf("avis") >= 0));
     }
     function readableDate(event) {
       var start = iso(event.start_date);
@@ -484,17 +593,23 @@
       return "Sede verificata";
     }
     function resultSet() {
-      var zone = document.getElementById("zone").value;
-      var from = document.getElementById("from").value;
-      var to = document.getElementById("to").value;
-      var category = document.getElementById("category").value;
       return data.filter(function (event) {
-        return zoneMatches(event, zone) && overlaps(event, from, to) && (category === "all" || event.category === category || (category === "avis" && (event.special_filters || []).indexOf("avis") >= 0));
+        return eventMatchesNonGeographicFilters(event) &&
+          withinSelectedRadius(event.latitude, event.longitude);
       }).sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
     }
-    function monitoringSet(zone) {
+    function municipalityPoint(name) {
+      var matches = data.filter(function (event) { return event.municipality === name; });
+      if (!matches.length) return null;
+      return {
+        latitude: matches.reduce(function (sum, event) { return sum + Number(event.latitude); }, 0) / matches.length,
+        longitude: matches.reduce(function (sum, event) { return sum + Number(event.longitude); }, 0) / matches.length
+      };
+    }
+    function monitoringSet() {
       return monitoring.filter(function (item) {
-        return zoneMatches(item, zone);
+        var point = municipalityPoint(item.municipality);
+        return point && withinSelectedRadius(point.latitude, point.longitude);
       }).sort(function (a, b) {
         return a.municipality.localeCompare(b.municipality) || a.title.localeCompare(b.title);
       });
@@ -512,12 +627,11 @@
         helper.textContent = "Intervallo troppo ampio: massimo 92 giorni per mantenere la ricerca leggera.";
         return false;
       }
-      helper.textContent = "Filtri locali: 0 token e 0 chiamate Groq.";
+      helper.textContent = searchReference.label + " · entro " + selectedRadius() + " km · filtri locali senza AI.";
       return true;
     }
     function render() {
       if (!validateWindow()) return;
-      var zone = document.getElementById("zone").value;
       var results = resultSet();
       var list = document.getElementById("events");
       var towns = new Set(results.map(function (e) { return e.municipality; }));
@@ -525,9 +639,9 @@
       document.getElementById("eventCount").textContent = results.length;
       document.getElementById("townCount").textContent = towns.size;
       document.getElementById("sourceCount").textContent = sources.size;
-      document.getElementById("resultLabel").textContent = zoneLabels[zone];
-      document.getElementById("mapTitle").textContent = zoneLabels[zone];
-      document.getElementById("mapStatus").textContent = results.length + " sagre o fiere confermate · dati aggiornati al 23 luglio 2026";
+      document.getElementById("resultLabel").textContent = "entro " + selectedRadius() + " km da " + searchReference.label;
+      document.getElementById("mapTitle").textContent = searchReference.label + " · " + selectedRadius() + " km";
+      document.getElementById("mapStatus").textContent = results.length + " sagre o fiere confermate nel raggio · dati aggiornati al 23 luglio 2026";
       list.innerHTML = "";
 
       if (!results.length) {
@@ -551,11 +665,11 @@
           list.appendChild(card);
         });
       }
-      renderMonitoring(zone);
-      renderMap(results, zone);
+      renderMonitoring();
+      renderMap(results);
     }
-    function renderMonitoring(zone) {
-      var items = monitoringSet(zone);
+    function renderMonitoring() {
+      var items = monitoringSet();
       var container = document.getElementById("monitoring");
       document.getElementById("monitorLabel").textContent = items.length + " ricorrenze · fuori mappa finché manca la data";
       container.innerHTML = "";
@@ -577,9 +691,21 @@
       map.setView([event.latitude, event.longitude], event.location_precision === "municipality_centroid" ? 12 : 14, {animate:true});
       L.popup().setLatLng([event.latitude, event.longitude]).setContent(popup(event)).openOn(map);
     }
-    function renderMap(results, zone) {
+    function renderMap(results) {
       markerLayer.clearLayers();
-      var bounds = [];
+      if (radiusLayer) radiusLayer.remove();
+      radiusLayer = L.circle(
+        [searchReference.latitude, searchReference.longitude],
+        {
+          radius: selectedRadius() * 1000,
+          color: "#1c6443",
+          weight: 2,
+          opacity: .68,
+          fillColor: "#2f865d",
+          fillOpacity: .08,
+          interactive: false
+        }
+      ).addTo(map);
       results.forEach(function (event) {
         var markerIcon = L.divIcon({
           className: "",
@@ -588,15 +714,176 @@
           iconAnchor: [17,32]
         });
         L.marker([event.latitude, event.longitude], {icon:markerIcon}).addTo(markerLayer).bindPopup(popup(event));
-        bounds.push([event.latitude, event.longitude]);
       });
-      if (bounds.length === 1) map.setView(bounds[0], 13);
-      else if (bounds.length > 1) map.fitBounds(bounds, {padding:[55,55], maxZoom:12});
-      else {
-        var selected = zones.find(function (item) { return item.id === zone; });
-        var center = selected ? [selected.center.latitude, selected.center.longitude] : [45.25,10.68];
-        map.setView(center, 10);
+      map.fitBounds(radiusLayer.getBounds(), {padding:[42,42]});
+    }
+    function buildLocationItems() {
+      var places = {};
+      data.forEach(function (event) {
+        var key = normalizedSearch(event.municipality);
+        var place = places[key] || {
+          label: event.municipality,
+          latitudeTotal: 0,
+          longitudeTotal: 0,
+          count: 0
+        };
+        place.latitudeTotal += Number(event.latitude);
+        place.longitudeTotal += Number(event.longitude);
+        place.count += 1;
+        places[key] = place;
+      });
+      zones.forEach(function (zone) {
+        if (!zone.center || !zone.label) return;
+        var key = normalizedSearch(zone.label);
+        if (!places[key]) {
+          places[key] = {
+            label: zone.label,
+            latitudeTotal: Number(zone.center.latitude),
+            longitudeTotal: Number(zone.center.longitude),
+            count: 1
+          };
+        }
+      });
+      locationItems = Object.keys(places).map(function (key) {
+        var item = places[key];
+        return {
+          type: "place",
+          label: item.label,
+          detail: "Località",
+          latitude: item.latitudeTotal / item.count,
+          longitude: item.longitudeTotal / item.count
+        };
+      }).sort(function (a, b) { return a.label.localeCompare(b.label); });
+    }
+    function localSuggestions(query) {
+      var needle = normalizedSearch(query);
+      if (!needle) return [];
+      var eventItems = data.filter(function (event) {
+        return normalizedSearch(event.title).indexOf(needle) >= 0 &&
+          eventMatchesNonGeographicFilters(event) &&
+          withinSelectedRadius(event.latitude, event.longitude);
+      }).map(function (event) {
+        return {
+          type: "event",
+          label: event.title,
+          detail: "Evento · " + event.municipality + " · " + readableDate(event),
+          latitude: Number(event.latitude),
+          longitude: Number(event.longitude),
+          event: event
+        };
+      });
+      var placeItems = locationItems.filter(function (item) {
+        return normalizedSearch(item.label).indexOf(needle) >= 0;
+      });
+      return eventItems.concat(placeItems).slice(0, 8);
+    }
+    function closeSuggestions() {
+      var panel = document.getElementById("searchSuggestions");
+      panel.classList.remove("open");
+      panel.innerHTML = "";
+    }
+    function chooseSuggestion(item) {
+      searchReference = {
+        latitude: item.latitude,
+        longitude: item.longitude,
+        label: item.label,
+        type: item.type
+      };
+      document.getElementById("placeSearch").value = item.label;
+      closeSuggestions();
+      render();
+      if (item.event) focusEvent(item.event);
+    }
+    function showSuggestions() {
+      var input = document.getElementById("placeSearch");
+      var panel = document.getElementById("searchSuggestions");
+      var items = localSuggestions(input.value);
+      panel.innerHTML = "";
+      if (!items.length) {
+        closeSuggestions();
+        return;
       }
+      items.forEach(function (item) {
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "suggestion";
+        button.setAttribute("role", "option");
+        button.innerHTML = "<strong>" + esc(item.label) + "</strong><span>" + esc(item.detail) + "</span>";
+        button.addEventListener("mousedown", function (event) {
+          event.preventDefault();
+          chooseSuggestion(item);
+        });
+        panel.appendChild(button);
+      });
+      panel.classList.add("open");
+    }
+    function geocodePlace(query) {
+      var url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=it&q=" +
+        encodeURIComponent(query);
+      return fetch(url, {
+        headers: {"Accept-Language": "it"}
+      }).then(function (response) {
+        if (!response.ok) throw new Error("geocoding unavailable");
+        return response.json();
+      }).then(function (items) {
+        if (!items.length) throw new Error("place not found");
+        return {
+          latitude: Number(items[0].lat),
+          longitude: Number(items[0].lon),
+          label: items[0].display_name.split(",").slice(0, 2).join(","),
+          type: "place"
+        };
+      });
+    }
+    function resolveSearchReference() {
+      var input = document.getElementById("placeSearch");
+      var query = input.value.trim();
+      var local = localSuggestions(query).find(function (item) {
+        return normalizedSearch(item.label) === normalizedSearch(query);
+      });
+      if (local) {
+        chooseSuggestion(local);
+        return Promise.resolve();
+      }
+      if (!query) {
+        input.value = searchReference.label;
+        render();
+        return Promise.resolve();
+      }
+      document.getElementById("helper").textContent = "Cerco " + query + "…";
+      return geocodePlace(query).then(function (place) {
+        searchReference = place;
+        input.value = place.label;
+        closeSuggestions();
+        render();
+      }).catch(function () {
+        document.getElementById("helper").textContent = "Località non trovata. Prova con comune e provincia.";
+      });
+    }
+    function useCurrentPosition() {
+      var helper = document.getElementById("helper");
+      if (!navigator.geolocation) {
+        helper.textContent = "La posizione non è disponibile su questo dispositivo.";
+        return;
+      }
+      helper.textContent = "Sto rilevando la tua posizione…";
+      navigator.geolocation.getCurrentPosition(function (position) {
+        searchReference = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          label: "La mia posizione",
+          type: "geolocation"
+        };
+        document.getElementById("placeSearch").value = searchReference.label;
+        closeSuggestions();
+        render();
+      }, function () {
+        helper.textContent = "Posizione non disponibile: abilita il permesso GPS e riprova.";
+      }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 120000
+      });
     }
     function initMap() {
       map = L.map("map", {zoomControl:true}).setView([45.25,10.68], 10);
@@ -611,14 +898,10 @@
       monitoring = payloads[0].monitoring || [];
       zones = payloads[1].zones || [];
       sourceCatalog = payloads[1].sources || [];
-      var select = document.getElementById("zone");
       zones.forEach(function (zone) {
         zoneLabels[zone.id] = zone.label;
-        var option = document.createElement("option");
-        option.value = zone.id;
-        option.textContent = zone.label;
-        select.appendChild(option);
       });
+      buildLocationItems();
       var municipalityNames = new Set();
       zones.forEach(function (zone) {
         zone.municipalities.forEach(function (name) { municipalityNames.add(name); });
@@ -641,15 +924,32 @@
         document.getElementById("events").innerHTML = '<div class="empty"><strong>Apri il prototipo tramite server locale.</strong><span>Il browser ha bloccato il caricamento di events.json da file://.</span></div>';
       });
     }
-    document.getElementById("filters").addEventListener("submit", function (event) { event.preventDefault(); render(); });
-    ["zone","from","to","category"].forEach(function (id) {
+    document.getElementById("filters").addEventListener("submit", function (event) {
+      event.preventDefault();
+      resolveSearchReference();
+    });
+    ["radius","from","to","category"].forEach(function (id) {
       document.getElementById(id).addEventListener("change", render);
     });
+    document.getElementById("placeSearch").addEventListener("input", showSuggestions);
+    document.getElementById("placeSearch").addEventListener("focus", showSuggestions);
+    document.getElementById("placeSearch").addEventListener("blur", function () {
+      setTimeout(closeSuggestions, 120);
+    });
+    document.getElementById("locate").addEventListener("click", useCurrentPosition);
     document.getElementById("reset").addEventListener("click", function () {
-      document.getElementById("zone").value = "all";
+      searchReference = {
+        latitude: 45.1564,
+        longitude: 10.7914,
+        label: "Mantova",
+        type: "place"
+      };
+      document.getElementById("placeSearch").value = "Mantova";
+      document.getElementById("radius").value = "30";
       document.getElementById("from").value = "2026-07-16";
       document.getElementById("to").value = "2026-08-31";
       document.getElementById("category").value = "all";
+      closeSuggestions();
       render();
     });
     initMap();
