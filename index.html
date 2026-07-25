@@ -363,6 +363,11 @@
       font-weight: 950;
     }
     .pin span { transform: rotate(45deg); }
+    .pin.is-highlighted {
+      background: var(--green);
+      box-shadow: 0 0 0 6px rgba(28,100,67,.14), 0 9px 22px rgba(31,45,36,.34);
+      transform: rotate(-45deg) scale(1.1);
+    }
     .leaflet-popup-content-wrapper { border-radius: 16px; }
     .popup { min-width: 220px; line-height: 1.4; }
     .popup b { display: block; margin-bottom: 5px; font-size: 14px; }
@@ -506,6 +511,14 @@
       type: "place"
     };
     var locationItems = [];
+    var activeResults = [];
+    var markersByEventKey = {};
+    var hoverOpenTimer;
+    var hoverCloseTimer;
+    var hoverPopupKey = "";
+    var pinnedPopupKey = "";
+    var viewportFrame;
+    var supportsHover = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
     function esc(value) {
       return String(value).replace(/[&<>"']/g, function (char) {
@@ -598,6 +611,22 @@
           withinSelectedRadius(event.latitude, event.longitude);
       }).sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
     }
+    function eventKey(event) {
+      return String(event.id || [event.title, event.municipality, event.start_date].join("|"));
+    }
+    function visibleResultSet() {
+      if (!map || !map.getBounds) return activeResults.slice();
+      var bounds = map.getBounds();
+      return activeResults.filter(function (event) {
+        return bounds.contains([Number(event.latitude), Number(event.longitude)]);
+      });
+    }
+    function setMarkerHighlighted(event, highlighted) {
+      var marker = markersByEventKey[eventKey(event)];
+      if (!marker || !marker.getElement()) return;
+      var pin = marker.getElement().querySelector(".pin");
+      if (pin) pin.classList.toggle("is-highlighted", highlighted);
+    }
     function municipalityPoint(name) {
       var matches = data.filter(function (event) { return event.municipality === name; });
       if (!matches.length) return null;
@@ -630,22 +659,25 @@
       helper.textContent = searchReference.label + " · entro " + selectedRadius() + " km · filtri locali senza AI.";
       return true;
     }
-    function render() {
-      if (!validateWindow()) return;
-      var results = resultSet();
-      var list = document.getElementById("events");
-      var towns = new Set(results.map(function (e) { return e.municipality; }));
-      var sources = new Set(results.map(function (e) { return e.source.name; }));
+    function updateResultSummary(results) {
+      var towns = new Set(results.map(function (event) { return event.municipality; }));
+      var sources = new Set(results.map(function (event) { return event.source.name; }));
       document.getElementById("eventCount").textContent = results.length;
       document.getElementById("townCount").textContent = towns.size;
       document.getElementById("sourceCount").textContent = sources.size;
-      document.getElementById("resultLabel").textContent = "entro " + selectedRadius() + " km da " + searchReference.label;
-      document.getElementById("mapTitle").textContent = searchReference.label + " · " + selectedRadius() + " km";
-      document.getElementById("mapStatus").textContent = results.length + " sagre o fiere confermate nel raggio · dati aggiornati al 23 luglio 2026";
+      document.getElementById("resultLabel").textContent =
+        results.length + " visibili nella mappa · entro " + selectedRadius() + " km da " + searchReference.label;
+      document.getElementById("mapStatus").textContent =
+        activeResults.length + " nel raggio · " + results.length + " visibili nell'inquadratura · dati aggiornati al 23 luglio 2026";
+    }
+    function renderEventList(results) {
+      var list = document.getElementById("events");
       list.innerHTML = "";
 
       if (!results.length) {
-        list.innerHTML = '<div class="empty"><strong>Nessuna sagra con data confermata in questa selezione.</strong><span>Non inseriamo eventi generici per riempire la mappa. Controlla sotto le tradizioni già individuate ma ancora senza una data verificata.</span></div>';
+        list.innerHTML = activeResults.length
+          ? '<div class="empty"><strong>Nessun evento visibile in questa porzione di mappa.</strong><span>Allarga lo zoom o sposta la mappa per ritrovare gli eventi compresi nel raggio scelto.</span></div>'
+          : '<div class="empty"><strong>Nessuna sagra con data confermata in questa selezione.</strong><span>Non inseriamo eventi generici per riempire la mappa. Controlla sotto le tradizioni già individuate ma ancora senza una data verificata.</span></div>';
       } else {
         results.forEach(function (event) {
           var start = iso(event.start_date);
@@ -662,11 +694,35 @@
             if (clickEvent.target.tagName === "A") return;
             focusEvent(event);
           });
+          card.addEventListener("mouseenter", function () {
+            setMarkerHighlighted(event, true);
+          });
+          card.addEventListener("mouseleave", function () {
+            setMarkerHighlighted(event, false);
+          });
           list.appendChild(card);
         });
       }
+    }
+    function updateViewportResults() {
+      var results = visibleResultSet();
+      updateResultSummary(results);
+      renderEventList(results);
+    }
+    function scheduleViewportUpdate() {
+      if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
+      viewportFrame = window.requestAnimationFrame(function () {
+        viewportFrame = null;
+        updateViewportResults();
+      });
+    }
+    function render() {
+      if (!validateWindow()) return;
+      activeResults = resultSet();
+      document.getElementById("mapTitle").textContent = searchReference.label + " · " + selectedRadius() + " km";
       renderMonitoring();
-      renderMap(results);
+      renderMap(activeResults);
+      updateViewportResults();
     }
     function renderMonitoring() {
       var items = monitoringSet();
@@ -689,9 +745,18 @@
     }
     function focusEvent(event) {
       map.setView([event.latitude, event.longitude], event.location_precision === "municipality_centroid" ? 12 : 14, {animate:true});
-      L.popup().setLatLng([event.latitude, event.longitude]).setContent(popup(event)).openOn(map);
+      var marker = markersByEventKey[eventKey(event)];
+      if (marker) {
+        pinnedPopupKey = eventKey(event);
+        marker.openPopup();
+      }
     }
     function renderMap(results) {
+      window.clearTimeout(hoverOpenTimer);
+      window.clearTimeout(hoverCloseTimer);
+      hoverPopupKey = "";
+      pinnedPopupKey = "";
+      markersByEventKey = {};
       markerLayer.clearLayers();
       if (radiusLayer) radiusLayer.remove();
       radiusLayer = L.circle(
@@ -711,9 +776,41 @@
           className: "",
           html: '<div class="pin"><span>' + esc(event.category.slice(0,1).toUpperCase()) + '</span></div>',
           iconSize: [34,34],
-          iconAnchor: [17,32]
+          iconAnchor: [17,32],
+          popupAnchor: [0,-24]
         });
-        L.marker([event.latitude, event.longitude], {icon:markerIcon}).addTo(markerLayer).bindPopup(popup(event));
+        var key = eventKey(event);
+        var marker = L.marker([event.latitude, event.longitude], {icon:markerIcon})
+          .addTo(markerLayer)
+          .bindPopup(popup(event), {autoPan:false});
+        marker._sagreEventKey = key;
+        markersByEventKey[key] = marker;
+        marker.on("click", function () {
+          window.clearTimeout(hoverOpenTimer);
+          window.clearTimeout(hoverCloseTimer);
+          pinnedPopupKey = key;
+          hoverPopupKey = "";
+        });
+        if (supportsHover) {
+          marker.on("mouseover", function () {
+            window.clearTimeout(hoverCloseTimer);
+            window.clearTimeout(hoverOpenTimer);
+            hoverOpenTimer = window.setTimeout(function () {
+              if (!pinnedPopupKey) {
+                hoverPopupKey = key;
+                marker.openPopup();
+              }
+            }, 1000);
+          });
+          marker.on("mouseout", function () {
+            window.clearTimeout(hoverOpenTimer);
+            if (hoverPopupKey !== key || pinnedPopupKey === key) return;
+            hoverCloseTimer = window.setTimeout(function () {
+              marker.closePopup();
+              hoverPopupKey = "";
+            }, 250);
+          });
+        }
       });
       map.fitBounds(radiusLayer.getBounds(), {padding:[42,42]});
     }
@@ -892,6 +989,12 @@
         attribution: "&copy; OpenStreetMap"
       }).addTo(map);
       markerLayer = L.layerGroup().addTo(map);
+      map.on("moveend zoomend", scheduleViewportUpdate);
+      map.on("popupclose", function (event) {
+        var key = event.popup && event.popup._source && event.popup._source._sagreEventKey;
+        if (key && pinnedPopupKey === key) pinnedPopupKey = "";
+        if (key && hoverPopupKey === key) hoverPopupKey = "";
+      });
     }
     function hydrateData(payloads) {
       data = payloads[0].events || [];
