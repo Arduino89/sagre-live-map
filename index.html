@@ -418,9 +418,9 @@
           <label for="radius">Distanza massima</label>
           <select class="control" id="radius">
             <option value="5">5 km</option>
-            <option value="10">10 km</option>
+            <option value="10" selected>10 km</option>
             <option value="20">20 km</option>
-            <option value="30" selected>30 km</option>
+            <option value="30">30 km</option>
             <option value="50">50 km</option>
           </select>
         </div>
@@ -449,7 +449,7 @@
           <button class="btn btn-primary" type="submit">Mostra eventi</button>
           <button class="btn btn-ghost" id="reset" type="button">Reset</button>
         </div>
-        <div class="helper" id="helper">Mantova · entro 30 km · intervallo massimo 92 giorni.</div>
+        <div class="helper" id="helper">Mantova · entro 10 km · intervallo massimo 92 giorni.</div>
       </form>
 
       <div class="summary">
@@ -945,7 +945,7 @@
         type: "place"
       };
       document.getElementById("placeSearch").value = "Mantova";
-      document.getElementById("radius").value = "30";
+      document.getElementById("radius").value = "10";
       document.getElementById("from").value = "2026-07-16";
       document.getElementById("to").value = "2026-08-31";
       document.getElementById("category").value = "all";
