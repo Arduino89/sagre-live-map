@@ -108,4 +108,4 @@ jobs:
           echo "GitHub Pages is not serving the exact complete bundle from this commit."
           exit 1
 
-# Deployment retry after explicit sync dispatch fix (2026-07-25).
+# Direct deployment trigger for viewport interactions (2026-07-26).
