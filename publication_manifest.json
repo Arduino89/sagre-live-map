@@ -3,21 +3,21 @@
   "publicationGateVersion": "0.7.0",
   "status": "ready_for_deploy",
   "parity": true,
-  "canonicalEventCount": 64,
-  "publicEventCount": 64,
-  "canonicalAsOf": "2026-07-23",
-  "publicAsOf": "2026-07-23",
+  "canonicalEventCount": 98,
+  "publicEventCount": 98,
+  "canonicalAsOf": "2026-08-25",
+  "publicAsOf": "2026-08-25",
   "missingPublicEventIds": [],
   "extraPublicEventIds": [],
-  "eventIdsSha256": "5d25cde81896a18f7fdd42ce093ef5e586ba64c24d5717803b1a2289a3a54cc1",
-  "publicEventIdsSha256": "5d25cde81896a18f7fdd42ce093ef5e586ba64c24d5717803b1a2289a3a54cc1",
+  "eventIdsSha256": "b89bbf4985580e1224cd6a44d1ceb96c84766504e31d4cfee3159b48dadde357",
+  "publicEventIdsSha256": "b89bbf4985580e1224cd6a44d1ceb96c84766504e31d4cfee3159b48dadde357",
   "bundleFiles": {
     "events.json": {
-      "sha256": "ec06acdfc389d274b164056416806a6d9f18ee582b25adfc7742e964bd56a29d",
-      "sizeBytes": 199008
+      "sha256": "3466911d326ec121313a2852849d1c7ad27ab37f8c50126482cbd7996d5ef252",
+      "sizeBytes": 284803
     },
     "index.html": {
-      "sha256": "d3ad18fb84548442cd27a29750b178bb775ff936f934906372286e3e34d63a6a",
+      "sha256": "bb8367db724336b878242de7ecbbc80e5b155bf9e85e574b761d1b9fa3373311",
       "sizeBytes": 41179
     },
     "demo-mobile.html": {
