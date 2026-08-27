@@ -411,6 +411,15 @@
       <div class="scope-audit"><strong id="coverageSummary">Caricamento copertura…</strong><span>La mappa mostra soltanto gli eventi dentro il raggio scelto.</span></div>
 
       <form class="filters" id="filters">
+<!-- SAGRE_CATALOG_MODE_V1_START -->
+        <div class="field catalog-mode-field">
+          <label>Vista eventi</label>
+          <div class="filter-actions" role="group" aria-label="Vista eventi">
+            <button class="btn btn-primary" id="showCatalog" type="button">Catalogo completo</button>
+            <button class="btn btn-ghost" id="showNearby" type="button">Cerca nelle vicinanze</button>
+          </div>
+        </div>
+<!-- SAGRE_CATALOG_MODE_V1_END -->
         <div class="field search">
           <label for="placeSearch">Da dove vuoi partire?</label>
           <span class="search-icon" aria-hidden="true">⌕</span>
@@ -459,9 +468,9 @@
       </form>
 
       <div class="summary">
-        <div class="metric"><strong id="eventCount">0</strong><span>eventi trovati</span></div>
-        <div class="metric"><strong id="townCount">0</strong><span>comuni</span></div>
-        <div class="metric"><strong id="sourceCount">0</strong><span>fonti ufficiali</span></div>
+        <div class="metric"><strong id="totalCatalogCount">0</strong><span>eventi verificati totali</span></div>
+        <div class="metric"><strong id="filteredCount">0</strong><span>risultati della vista</span></div>
+        <div class="metric"><strong id="viewportCount">0</strong><span>marker nell'inquadratura</span></div>
       </div>
 
       <div class="result-heading">
@@ -513,6 +522,7 @@
     };
     var locationItems = [];
     var activeResults = [];
+    var viewMode = "catalog";
     var markersByEventKey = {};
     var hoverOpenTimer;
     var hoverCloseTimer;
@@ -607,10 +617,11 @@
       return "Sede verificata";
     }
     function resultSet() {
-      return data.filter(function (event) {
+      var results = viewMode === "catalog" ? data.slice() : data.filter(function (event) {
         return eventMatchesNonGeographicFilters(event) &&
           withinSelectedRadius(event.latitude, event.longitude);
-      }).sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
+      });
+      return results.sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
     }
     function eventKey(event) {
       return String(event.id || [event.title, event.municipality, event.start_date].join("|"));
@@ -645,6 +656,10 @@
       });
     }
     function validateWindow() {
+      if (viewMode === "catalog") {
+        document.getElementById("helper").textContent = "Catalogo completo: date, categoria e raggio non riducono gli eventi pubblicati.";
+        return true;
+      }
       var from = document.getElementById("from").value;
       var to = document.getElementById("to").value;
       var helper = document.getElementById("helper");
@@ -660,16 +675,15 @@
       helper.textContent = searchReference.label + " · entro " + selectedRadius() + " km · filtri locali senza AI.";
       return true;
     }
-    function updateResultSummary(results) {
-      var towns = new Set(results.map(function (event) { return event.municipality; }));
-      var sources = new Set(results.map(function (event) { return event.source.name; }));
-      document.getElementById("eventCount").textContent = results.length;
-      document.getElementById("townCount").textContent = towns.size;
-      document.getElementById("sourceCount").textContent = sources.size;
-      document.getElementById("resultLabel").textContent =
-        results.length + " visibili nella mappa · entro " + selectedRadius() + " km da " + searchReference.label;
+    function updateResultSummary(viewportResults) {
+      document.getElementById("totalCatalogCount").textContent = data.length;
+      document.getElementById("filteredCount").textContent = activeResults.length;
+      document.getElementById("viewportCount").textContent = viewportResults.length;
+      document.getElementById("resultLabel").textContent = viewMode === "catalog"
+        ? activeResults.length + " eventi nel catalogo completo"
+        : activeResults.length + " risultati entro " + selectedRadius() + " km da " + searchReference.label;
       document.getElementById("mapStatus").textContent =
-        activeResults.length + " nel raggio · " + results.length + " visibili nell'inquadratura · dati aggiornati al 25 agosto 2026";
+        activeResults.length + " risultati della vista · " + viewportResults.length + " marker nell'inquadratura · dati aggiornati al 25 agosto 2026";
     }
     function renderEventList(results) {
       var list = document.getElementById("events");
@@ -706,9 +720,9 @@
       }
     }
     function updateViewportResults() {
-      var results = visibleResultSet();
-      updateResultSummary(results);
-      renderEventList(results);
+      var viewportResults = visibleResultSet();
+      updateResultSummary(viewportResults);
+      renderEventList(activeResults);
     }
     function scheduleViewportUpdate() {
       if (viewportFrame) window.cancelAnimationFrame(viewportFrame);
@@ -720,7 +734,9 @@
     function render() {
       if (!validateWindow()) return;
       activeResults = resultSet();
-      document.getElementById("mapTitle").textContent = searchReference.label + " · " + selectedRadius() + " km";
+      document.getElementById("mapTitle").textContent = viewMode === "catalog"
+        ? "Catalogo completo"
+        : searchReference.label + " · " + selectedRadius() + " km";
       renderMonitoring();
       renderMap(activeResults);
       updateViewportResults();
@@ -760,18 +776,21 @@
       markersByEventKey = {};
       markerLayer.clearLayers();
       if (radiusLayer) radiusLayer.remove();
-      radiusLayer = L.circle(
-        [searchReference.latitude, searchReference.longitude],
-        {
-          radius: selectedRadius() * 1000,
-          color: "#1c6443",
-          weight: 2,
-          opacity: .68,
-          fillColor: "#2f865d",
-          fillOpacity: .08,
-          interactive: false
-        }
-      ).addTo(map);
+      radiusLayer = null;
+      if (viewMode === "nearby") {
+        radiusLayer = L.circle(
+          [searchReference.latitude, searchReference.longitude],
+          {
+            radius: selectedRadius() * 1000,
+            color: "#1c6443",
+            weight: 2,
+            opacity: .68,
+            fillColor: "#2f865d",
+            fillOpacity: .08,
+            interactive: false
+          }
+        ).addTo(map);
+      }
       results.forEach(function (event) {
         var markerIcon = L.divIcon({
           className: "",
@@ -813,7 +832,11 @@
           });
         }
       });
-      map.fitBounds(radiusLayer.getBounds(), {padding:[42,42]});
+      if (viewMode === "catalog" && markerLayer.getLayers().length) {
+        map.fitBounds(L.featureGroup(markerLayer.getLayers()).getBounds(), {padding:[42,42]});
+      } else if (radiusLayer) {
+        map.fitBounds(radiusLayer.getBounds(), {padding:[42,42]});
+      }
     }
     function buildLocationItems() {
       var places = {};
@@ -1033,8 +1056,18 @@
       resolveSearchReference();
     });
     ["radius","from","to","category"].forEach(function (id) {
-      document.getElementById(id).addEventListener("change", render);
+      document.getElementById(id).addEventListener("change", function () {
+        if (viewMode === "nearby") render();
+      });
     });
+    function selectViewMode(mode) {
+      viewMode = mode;
+      document.getElementById("showCatalog").className = mode === "catalog" ? "btn btn-primary" : "btn btn-ghost";
+      document.getElementById("showNearby").className = mode === "nearby" ? "btn btn-primary" : "btn btn-ghost";
+      render();
+    }
+    document.getElementById("showCatalog").addEventListener("click", function () { selectViewMode("catalog"); });
+    document.getElementById("showNearby").addEventListener("click", function () { selectViewMode("nearby"); });
     document.getElementById("placeSearch").addEventListener("input", showSuggestions);
     document.getElementById("placeSearch").addEventListener("focus", showSuggestions);
     document.getElementById("placeSearch").addEventListener("blur", function () {
@@ -1054,7 +1087,7 @@
       document.getElementById("to").value = "2026-08-31";
       document.getElementById("category").value = "all";
       closeSuggestions();
-      render();
+      selectViewMode("catalog");
     });
     initMap();
     loadData();
