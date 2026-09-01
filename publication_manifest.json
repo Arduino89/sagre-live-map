@@ -5,19 +5,19 @@
   "parity": true,
   "canonicalEventCount": 98,
   "publicEventCount": 98,
-  "canonicalAsOf": "2026-08-25",
-  "publicAsOf": "2026-08-25",
+  "canonicalAsOf": "2026-08-31",
+  "publicAsOf": "2026-08-31",
   "missingPublicEventIds": [],
   "extraPublicEventIds": [],
   "eventIdsSha256": "b89bbf4985580e1224cd6a44d1ceb96c84766504e31d4cfee3159b48dadde357",
   "publicEventIdsSha256": "b89bbf4985580e1224cd6a44d1ceb96c84766504e31d4cfee3159b48dadde357",
   "bundleFiles": {
     "events.json": {
-      "sha256": "3466911d326ec121313a2852849d1c7ad27ab37f8c50126482cbd7996d5ef252",
-      "sizeBytes": 284803
+      "sha256": "01ba8e09f98ddc7b0b6deea6499029b90eedfa2bbc91d59d1bf278864154012c",
+      "sizeBytes": 288952
     },
     "index.html": {
-      "sha256": "c20704c5db5bc6272693fafed4a7add50a4dbfea4561440f316eecdfa903c448",
+      "sha256": "69fe577e6a0bcf05db84d3ded6f106d706745e20f63b124313471f43c1542fdb",
       "sizeBytes": 41773
     },
     "demo-mobile.html": {
