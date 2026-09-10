@@ -484,7 +484,7 @@
       <div id="map" aria-label="Mappa degli eventi verificati"></div>
       <div class="map-overlay">
         <strong id="mapTitle">Tutte le zone</strong>
-        <span id="mapStatus">2 sagre e fiere confermate · dati aggiornati al 31 agosto 2026</span>
+        <span id="mapStatus">2 sagre e fiere confermate · dati aggiornati al 9 settembre 2026</span>
       </div>
     </section>
   </div>
@@ -645,20 +645,30 @@
       if (pin) pin.classList.toggle("is-highlighted", highlighted);
     }
     function municipalityPoint(name) {
-      var matches = data.filter(function (event) { return event.municipality === name; });
+      var matches = data.filter(function (event) {
+        return event.municipality === name &&
+          typeof event.latitude === "number" && Number.isFinite(event.latitude) && Math.abs(event.latitude) <= 90 &&
+          typeof event.longitude === "number" && Number.isFinite(event.longitude) && Math.abs(event.longitude) <= 180;
+      });
       if (!matches.length) return null;
       return {
-        latitude: matches.reduce(function (sum, event) { return sum + Number(event.latitude); }, 0) / matches.length,
-        longitude: matches.reduce(function (sum, event) { return sum + Number(event.longitude); }, 0) / matches.length
+        latitude: matches.reduce(function (sum, event) { return sum + event.latitude; }, 0) / matches.length,
+        longitude: matches.reduce(function (sum, event) { return sum + event.longitude; }, 0) / matches.length
       };
+    }
+    function monitoringOrder(a, b) {
+      return a.municipality.localeCompare(b.municipality) || a.title.localeCompare(b.title);
     }
     function monitoringSet() {
       return monitoring.filter(function (item) {
         var point = municipalityPoint(item.municipality);
         return point && withinSelectedRadius(point.latitude, point.longitude);
-      }).sort(function (a, b) {
-        return a.municipality.localeCompare(b.municipality) || a.title.localeCompare(b.title);
-      });
+      }).sort(monitoringOrder);
+    }
+    function unlocatedMonitoringSet() {
+      return monitoring.filter(function (item) {
+        return !municipalityPoint(item.municipality);
+      }).sort(monitoringOrder);
     }
     function validateWindow() {
       var from = document.getElementById("from").value;
@@ -683,7 +693,7 @@
       document.getElementById("resultLabel").textContent =
         activeResults.length + " risultati entro " + selectedRadius() + " km da " + searchReference.label;
       document.getElementById("mapStatus").textContent =
-        activeResults.length + " risultati della vista · " + viewportResults.length + " marker nell'inquadratura · dati aggiornati al 31 agosto 2026";
+        activeResults.length + " risultati della vista · " + viewportResults.length + " marker nell'inquadratura · dati aggiornati al 9 settembre 2026";
     }
     function renderEventList(results) {
       var list = document.getElementById("events");
@@ -741,19 +751,28 @@
     }
     function renderMonitoring() {
       var items = monitoringSet();
+      var unlocated = unlocatedMonitoringSet();
       var container = document.getElementById("monitoring");
-      document.getElementById("monitorLabel").textContent = items.length + " ricorrenze · fuori mappa finché manca la data";
+      document.getElementById("monitorLabel").textContent = items.length + " nel raggio · " + unlocated.length + " senza posizione · fuori mappa finché manca la data";
       container.innerHTML = "";
-      if (!items.length) {
-        container.innerHTML = '<div class="empty"><strong>Nessuna ricorrenza ancora catalogata.</strong><span>La fonte comunale o Pro Loco della zona entrerà nella prossima rotazione di ricerca.</span></div>';
+      if (!items.length && !unlocated.length) {
+        container.innerHTML = '<div class="empty"><strong>Nessuna ricorrenza disponibile per questa vista.</strong><span>La copertura può essere incompleta. Questa ricerca non avvia nuove verifiche delle fonti.</span></div>';
         return;
       }
-      items.forEach(function (item) {
-        var card = document.createElement("article");
-        card.className = "watch-card";
-        card.innerHTML = '<strong>' + esc(item.title) + '</strong><span><b>' + esc(item.municipality) + '</b> · ' + esc(item.period_text) + '</span><a href="' + esc(item.source.url) + '" target="_blank" rel="noreferrer">Fonte di scoperta ↗</a>';
-        container.appendChild(card);
-      });
+      function appendItems(entries, label) {
+        if (!entries.length) return;
+        var heading = document.createElement("h3");
+        heading.textContent = label;
+        container.appendChild(heading);
+        entries.forEach(function (item) {
+          var card = document.createElement("article");
+          card.className = "watch-card";
+          card.innerHTML = '<strong>' + esc(item.title) + '</strong><span><b>' + esc(item.municipality) + '</b> · ' + esc(item.period_text) + '</span><a href="' + esc(item.source.url) + '" target="_blank" rel="noreferrer">Fonte di scoperta ↗</a>';
+          container.appendChild(card);
+        });
+      }
+      appendItems(items, "Ricorrenze nel raggio selezionato");
+      appendItems(unlocated, "Posizione non disponibile · elenco non filtrato per distanza");
     }
     function popup(event) {
       return '<div class="popup"><b>' + esc(event.title) + '</b><span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) + '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) + '</span><br><div class="links">' + publicActionLinks(event) + '</div></div>';
