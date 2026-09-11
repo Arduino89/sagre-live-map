@@ -13,12 +13,12 @@
   "publicEventIdsSha256": "a9aced4f156375da4f0bdc9e4257bf767621e458da4a8fbdd4e8b57c784b7cd5",
   "bundleFiles": {
     "events.json": {
-      "sha256": "0a4af1207f87f7ca15a40d758570b553ad1bedae4c699c20877695b3a9e38eb4",
-      "sizeBytes": 295925
+      "sha256": "39565d615afd1da6679759c0618254c87fcbacf8b42217459db516a5d995b58b",
+      "sizeBytes": 306285
     },
     "index.html": {
-      "sha256": "5238cd5622a04fa1341789fe38dcb991704165dbb882ff4b6c7a47fe662e2b52",
-      "sizeBytes": 42745
+      "sha256": "b3f2b12b1a7beade57968263f429e7fcb13397f3bb70b6772f7899da77542d94",
+      "sizeBytes": 58663
     },
     "demo-mobile.html": {
       "sha256": "53014231829be6aead52ba53da0a8b45b7ae71b652d87da13aa50ebf38f23148",

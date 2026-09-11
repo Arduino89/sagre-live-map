@@ -1092,5 +1092,284 @@
     initMap();
     loadData();
   </script>
+<!-- SAGRE_REVIEW_STATUS_V1_START -->
+<style id="sagre-review-status-style">
+.review-status-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:8px 0; }
+.review-status-chip {
+  display:inline-flex; align-items:center; gap:5px; padding:5px 8px;
+  border-radius:999px; font-size:10px; font-weight:900; line-height:1.1;
+}
+.review-status-chip.reviewed-ok { color:#145c3a; background:#dff1e7; }
+.review-status-chip.review-needed { color:#715500; background:#fff1b8; }
+.review-status-chip.evidence-only { color:#842e2a; background:#f8d9d7; }
+.review-status-reason { color:var(--muted); font-size:10px; line-height:1.35; }
+.pin.reviewed-ok { background:#2f865d; }
+.pin.review-needed { background:#d4a72c; }
+.pin.evidence-only { background:#c94b45; }
+.pin.reviewed-ok.is-highlighted { background:#2f865d; }
+.pin.review-needed.is-highlighted { background:#d4a72c; }
+.pin.evidence-only.is-highlighted { background:#c94b45; }
+.pin.review-overlay-pin { border-style:dashed; opacity:.94; }
+.review-legend {
+  display:grid; gap:5px; margin-top:9px; padding-top:8px;
+  border-top:1px solid rgba(24,35,29,.12); font-size:10px;
+}
+.review-legend-line { display:flex; align-items:center; gap:6px; color:var(--muted); }
+.review-dot { width:9px; height:9px; border-radius:50%; display:inline-block; flex:0 0 9px; }
+.review-dot.green { background:#2f865d; }
+.review-dot.yellow { background:#d4a72c; }
+.review-dot.red { background:#c94b45; }
+.review-toggle { display:flex; align-items:center; gap:6px; margin-top:4px; color:var(--ink); font-weight:750; }
+.review-card {
+  padding:13px 14px; border:1px solid var(--line); border-radius:17px;
+  background:rgba(255,255,255,.72);
+}
+.review-card + .review-card { margin-top:8px; }
+.review-card strong { display:block; font-size:13px; }
+.review-card .review-meta { display:block; margin-top:4px; color:var(--muted); font-size:11px; }
+.review-card .review-source { display:inline-block; margin-top:7px; color:var(--green); font-size:11px; font-weight:850; text-decoration:none; }
+.popup .review-status-row { margin:7px 0 3px; }
+
+</style>
+<script id="sagre-review-status-v1">
+(function () {
+  "use strict";
+  var registry = {"asOf":"2026-09-11","defaultCanonicalReason":"Evento canonico: revisione indipendente Jarvis dello stato corrente non ancora registrata.","defaultCanonicalStatus":"review_needed","items":[{"candidateId":"research-sorbara-cotechino-2026","endDate":"2026-08-29","key":"candidate:research-sorbara-cotechino-2026","locality":"Sorbara","municipality":"Asola","reason":"Review indipendente positiva; ingresso canonico ancora soggetto al normale closure gate.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #385 research packet","sourceUrl":"https://www.comune.asola.mn.it/vivere-il-comune/eventi/sagra-del-cotechino-3/","startDate":"2026-08-28","status":"reviewed_ok","title":"Sagra del Cotechino — Sorbara di Asola"},{"candidateId":"research-sabbioneta-oratorio-2026","endDate":"2026-09-13","key":"candidate:research-sabbioneta-oratorio-2026","municipality":"Sabbioneta","reason":"Review indipendente positiva; ingresso canonico ancora soggetto al normale closure gate.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #385 research packet","sourceUrl":"https://www.comune.sabbioneta.mn.it/it/news/festa-delloratorio-2026-tre-giorni-di-condivisione-e-divertimento-a-sabbioneta","startDate":"2026-09-11","status":"reviewed_ok","title":"Festa dell’Oratorio di Sabbioneta"},{"candidateId":"research-borgoforte-2026","endDate":"2026-08-30","key":"candidate:research-borgoforte-2026","locality":"Borgoforte","municipality":"Borgo Virgilio","reason":"Review indipendente positiva; ingresso canonico ancora soggetto al normale closure gate.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #385 research packet","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260826-sagra-san-giovanni-battista-2026-borgoforte.php","startDate":"2026-08-28","status":"reviewed_ok","title":"Sagra di San Giovanni Battista — Borgoforte"},{"candidateId":"research-cappelletta-2026","endDate":"2026-09-13","key":"candidate:research-cappelletta-2026","locality":"Cappelletta","municipality":"Borgo Virgilio","reason":"Review indipendente positiva; le date reali restano 5–6 e 11–13 settembre, non un intervallo continuo.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #385 research packet","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260805-festa-di-turtei-2026-cappelletta-di-borgo-virgilio.php","startDate":"2026-09-05","status":"reviewed_ok","title":"Festa di Turtei — Cappelletta"},{"candidateId":"research-san-pio-2026","endDate":"2026-09-06","key":"candidate:research-san-pio-2026","locality":"San Pio X","municipality":"Mantova","reason":"Review indipendente positiva; ingresso canonico ancora soggetto al normale closure gate.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #385 research packet","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260826-festa-in-san-pio-mantova-2026.php","startDate":"2026-09-03","status":"reviewed_ok","title":"Festa in San Pio — Parrocchia San Pio X"},{"candidateId":"research-villa-saviola-2026","endDate":"2026-09-27","key":"candidate:research-villa-saviola-2026","locality":"Villa Saviola","municipality":"Motteggiana","reason":"Review indipendente positiva; ingresso canonico ancora soggetto al normale closure gate.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #385 research packet","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260901-festa-autunno-2026-villa-saviola.php","startDate":"2026-09-25","status":"reviewed_ok","title":"Festa d’Autunno — Villa Saviola"},{"candidateId":"calendar-event-356bb7bd9c1df5e6","endDate":"2026-09-06","key":"candidate:calendar-event-356bb7bd9c1df5e6","locality":"Cereta","municipality":"Volta Mantovana","reason":"Candidato già esistente arricchito con località Cereta; mapping canonico ancora da riesaminare senza creare duplicati.","sourceReceipt":"PR #385 candidate enrichment","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260824-festa-del-capunsel-2026-cereta-volta-mantovana.php","startDate":"2026-09-04","status":"review_needed","title":"Festa del capunsèl — Cereta"}],"schemaVersion":1};
+  var labels = {
+    reviewed_ok: "🟢 Revisionato Jarvis",
+    review_needed: "🟡 In revisione",
+    evidence_only: "🔴 Evidenza preliminare"
+  };
+  var canonical = Object.create(null);
+  var overlayItems = [];
+
+  (registry.items || []).forEach(function (item) {
+    if (item.canonicalEventId) canonical[String(item.canonicalEventId)] = item;
+    if (!item.canonicalEventId) overlayItems.push(item);
+  });
+
+  function statusClass(status) {
+    return status === "reviewed_ok" ? "reviewed-ok" :
+      status === "evidence_only" ? "evidence-only" : "review-needed";
+  }
+
+  function statusForEvent(event) {
+    var explicit = canonical[String(event.id || "")];
+    if (explicit) return explicit;
+    return {
+      status: registry.defaultCanonicalStatus || "review_needed",
+      reason: registry.defaultCanonicalReason ||
+        "Evento canonico: revisione indipendente Jarvis non ancora registrata."
+    };
+  }
+
+  function statusMarkup(meta) {
+    var status = meta && meta.status || "review_needed";
+    var label = labels[status] || labels.review_needed;
+    var reason = meta && meta.reason ? String(meta.reason) : "";
+    return '<div class="review-status-row"><span class="review-status-chip ' +
+      statusClass(status) + '">' + esc(label) + '</span>' +
+      (reason ? '<span class="review-status-reason">' + esc(reason) + '</span>' : '') +
+      '</div>';
+  }
+
+  function safeCoordinates(item) {
+    return typeof item.latitude === "number" && Number.isFinite(item.latitude) &&
+      Math.abs(item.latitude) <= 90 &&
+      typeof item.longitude === "number" && Number.isFinite(item.longitude) &&
+      Math.abs(item.longitude) <= 180;
+  }
+
+  function itemDateMatches(item) {
+    if (!item.startDate || !item.endDate) return true;
+    var from = document.getElementById("from").value;
+    var to = document.getElementById("to").value;
+    if (!from || !to) return true;
+    return iso(item.startDate) <= iso(to) && iso(item.endDate) >= iso(from);
+  }
+
+  function sourceLinkForItem(item) {
+    if (!item.sourceUrl) return "";
+    return '<a class="review-source" href="' + esc(item.sourceUrl) +
+      '" target="_blank" rel="noreferrer">Fonte verifica ↗</a>';
+  }
+
+  function reviewItemPopup(item) {
+    var place = [item.locality, item.municipality].filter(Boolean).join(" · ");
+    var dates = item.startDate ?
+      (item.startDate === item.endDate ? item.startDate : item.startDate + " → " + item.endDate) :
+      "date in review";
+    return '<div class="popup"><b>' + esc(item.title || item.key) + '</b>' +
+      statusMarkup(item) +
+      '<span><strong>NON CANONICO · lavoro in corso</strong><br>' +
+      esc(place) + '<br>' + esc(dates) + '</span><br>' +
+      sourceLinkForItem(item) + '</div>';
+  }
+
+  function reviewOverlayEnabled() {
+    var toggle = document.getElementById("reviewOverlayToggle");
+    return !toggle || toggle.checked;
+  }
+
+  function renderReviewOverlay() {
+    if (!window.reviewOverlayLayer || !window.map) return;
+    reviewOverlayLayer.clearLayers();
+    if (!reviewOverlayEnabled()) return;
+    overlayItems.forEach(function (item) {
+      if (!safeCoordinates(item) || !itemDateMatches(item)) return;
+      if (!withinSelectedRadius(item.latitude, item.longitude)) return;
+      var icon = L.divIcon({
+        className: "",
+        html: '<div class="pin review-overlay-pin ' + statusClass(item.status) +
+          '"><span>R</span></div>',
+        iconSize: [34,34],
+        iconAnchor: [17,32],
+        popupAnchor: [0,-24]
+      });
+      L.marker([item.latitude, item.longitude], {icon: icon})
+        .addTo(reviewOverlayLayer)
+        .bindPopup(reviewItemPopup(item), {autoPan:false});
+    });
+  }
+
+  function renderReviewList() {
+    var container = document.getElementById("reviewItems");
+    if (!container) return;
+    container.innerHTML = "";
+    var items = overlayItems.slice().sort(function (a, b) {
+      return String(a.startDate || "9999").localeCompare(String(b.startDate || "9999")) ||
+        String(a.title || a.key).localeCompare(String(b.title || b.key));
+    });
+    document.getElementById("reviewLabel").textContent =
+      items.length + " elementi non canonici · non contano nel catalogo";
+    if (!items.length) {
+      container.innerHTML =
+        '<div class="empty"><strong>Nessun elemento non canonico in review.</strong>' +
+        '<span>I marker colorati del catalogo restano comunque legati allo stato di revisione.</span></div>';
+      return;
+    }
+    items.forEach(function (item) {
+      var card = document.createElement("article");
+      card.className = "review-card";
+      var place = [item.locality, item.municipality].filter(Boolean).join(" · ");
+      card.innerHTML = '<strong>' + esc(item.title || item.key) + '</strong>' +
+        statusMarkup(item) +
+        '<span class="review-meta">NON CANONICO · ' + esc(place || "geografia da review") + '</span>' +
+        sourceLinkForItem(item);
+      container.appendChild(card);
+    });
+  }
+
+  publicActionLinks = function (event) {
+    var source = event && event.source || {};
+    var parts = [];
+    var seen = Object.create(null);
+    var publicUrls = Object.create(null);
+    [source.public_poster_url, source.public_event_page_url, source.public_directions_url]
+      .filter(Boolean).forEach(function (url) { publicUrls[String(url)] = true; });
+    function add(url, label) {
+      if (!url) return;
+      var key = String(url);
+      if (seen[key]) return;
+      seen[key] = true;
+      parts.push('<a href="' + esc(key) + '" target="_blank" rel="noreferrer">' +
+        label + ' ↗</a>');
+    }
+    if (source.url && !publicUrls[String(source.url)]) {
+      add(source.url, "Fonte verifica");
+    }
+    add(source.public_poster_url, "Locandina");
+    add(source.public_event_page_url, "Dettagli evento");
+    add(source.public_directions_url, "Indicazioni");
+    return parts.length ? parts.join("") :
+      '<span class="link-unavailable">Collegamenti pubblici non disponibili</span>';
+  };
+
+  popup = function (event) {
+    return '<div class="popup"><b>' + esc(event.title) + '</b>' +
+      statusMarkup(statusForEvent(event)) +
+      '<span>' + esc(event.municipality) + ' · ' + esc(readableDate(event)) +
+      '<br>' + esc(event.venue) + '<br>' + esc(locationLabel(event)) +
+      '</span><br><div class="links">' + publicActionLinks(event) + '</div></div>';
+  };
+
+  var oldRenderEventList = renderEventList;
+  renderEventList = function (results) {
+    oldRenderEventList(results);
+    var cards = Array.from(document.querySelectorAll("#events .event"));
+    cards.forEach(function (card, index) {
+      var event = results[index];
+      if (!event) return;
+      var top = card.querySelector(".event-top");
+      if (!top) return;
+      var holder = document.createElement("div");
+      holder.innerHTML = statusMarkup(statusForEvent(event));
+      top.insertAdjacentElement("afterend", holder.firstElementChild);
+    });
+  };
+
+  var oldRenderMap = renderMap;
+  renderMap = function (results) {
+    oldRenderMap(results);
+    results.forEach(function (event) {
+      var marker = markersByEventKey[eventKey(event)];
+      if (!marker) return;
+      marker.setPopupContent(popup(event));
+      var element = marker.getElement();
+      var pin = element && element.querySelector(".pin");
+      if (pin) pin.classList.add(statusClass(statusForEvent(event).status));
+    });
+    renderReviewOverlay();
+  };
+
+  function installLegend() {
+    var overlay = document.querySelector(".map-overlay");
+    if (!overlay || document.getElementById("reviewLegend")) return;
+    var legend = document.createElement("div");
+    legend.className = "review-legend";
+    legend.id = "reviewLegend";
+    legend.innerHTML =
+      '<div class="review-legend-line"><span class="review-dot green"></span><span>Revisionato Jarvis</span></div>' +
+      '<div class="review-legend-line"><span class="review-dot yellow"></span><span>In revisione</span></div>' +
+      '<div class="review-legend-line"><span class="review-dot red"></span><span>Evidenza preliminare</span></div>' +
+      '<label class="review-toggle"><input id="reviewOverlayToggle" type="checkbox" checked> Mostra ricerca non canonica</label>';
+    overlay.appendChild(legend);
+    document.getElementById("reviewOverlayToggle").addEventListener("change", renderReviewOverlay);
+  }
+
+  function installReviewList() {
+    if (document.getElementById("reviewItems")) return;
+    var monitoring = document.getElementById("monitoring");
+    if (!monitoring || !monitoring.parentNode) return;
+    var headings = Array.from(monitoring.parentNode.querySelectorAll(".result-heading"));
+    var monitoringHeading = headings.length ? headings[headings.length - 1] : monitoring;
+    var heading = document.createElement("div");
+    heading.className = "result-heading";
+    heading.innerHTML =
+      '<h2>Stato revisione</h2><span id="reviewLabel">caricamento…</span>';
+    var list = document.createElement("div");
+    list.className = "monitoring";
+    list.id = "reviewItems";
+    monitoring.parentNode.insertBefore(heading, monitoringHeading);
+    monitoring.parentNode.insertBefore(list, monitoringHeading);
+  }
+
+  if (window.map && window.L) {
+    window.reviewOverlayLayer = L.layerGroup().addTo(map);
+  }
+  installLegend();
+  installReviewList();
+  renderReviewList();
+
+  var toggle = document.getElementById("reviewOverlayToggle");
+  if (toggle) toggle.checked = true;
+
+  if (Array.isArray(window.data) && window.data.length) {
+    render();
+  }
+})();
+
+</script>
+<!-- SAGRE_REVIEW_STATUS_V1_END -->
 </body>
 </html>
