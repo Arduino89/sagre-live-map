@@ -458,7 +458,7 @@
           <button class="btn btn-primary" type="submit">Mostra eventi</button>
           <button class="btn btn-ghost" id="reset" type="button">Reset</button>
         </div>
-        <div class="helper" id="helper">Mantova · entro 10 km · intervallo massimo 92 giorni.</div>
+        <div class="helper" id="helper">Mantova · entro 10 km · date del catalogo · nessuna nuova scansione.</div>
       </form>
 
       <div class="summary">
@@ -584,8 +584,13 @@
     function readableDate(event) {
       var start = iso(event.start_date);
       var end = iso(event.end_date);
-      var format = new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"long"});
-      return event.start_date === event.end_date ? format.format(start) : format.format(start) + " – " + format.format(end);
+      var format = new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"long", year:"numeric"});
+      var intervals = event.date_intervals && event.date_intervals.length
+        ? event.date_intervals : [{start_date:event.start_date, end_date:event.end_date}];
+      return intervals.map(function(interval) {
+        var a = iso(interval.start_date), b = iso(interval.end_date);
+        return interval.start_date === interval.end_date ? format.format(a) : format.format(a) + " – " + format.format(b);
+      }).join("; ");
     }
     function verifiedDate(event) {
       return new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"short"}).format(new Date(event.source.verified_at));
@@ -675,15 +680,10 @@
       var to = document.getElementById("to").value;
       var helper = document.getElementById("helper");
       if (!from || !to || iso(to) < iso(from)) {
-        helper.textContent = "Controlla le date: la fine deve essere successiva all'inizio.";
+        helper.textContent = "Controlla le date: la fine deve essere uguale o successiva all'inizio.";
         return false;
       }
-      var days = Math.round((iso(to) - iso(from)) / 86400000);
-      if (days > 92) {
-        helper.textContent = "Intervallo troppo ampio: massimo 92 giorni per mantenere la ricerca leggera.";
-        return false;
-      }
-      helper.textContent = searchReference.label + " · entro " + selectedRadius() + " km · filtri locali senza AI.";
+      helper.textContent = searchReference.label + " · entro " + selectedRadius() + " km · filtri sul catalogo, senza nuove scansioni.";
       return true;
     }
     function updateResultSummary(viewportResults) {
