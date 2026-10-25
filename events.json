@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-16",
-  "asOf": "2026-10-16",
+  "generatedAt": "2026-10-21T10:45:00+02:00",
+  "asOf": "2026-10-21",
   "events": [
     {
       "id": "burger-fest-avis-quingentole-2026",
@@ -5478,7 +5478,7 @@
       "source": {
         "name": "Città di Goito — Calendario Colline Moreniche 2026",
         "url": "https://www.comune.goito.mn.it/it-it/immagine/img-125313-M2-28-1345-0-0-a6742aabacb5a9fd8daaded1a772320b",
-        "event_page_url": "https://www.comune.goito.mn.it/it-it/vivere-il-comune/eventi/colline-moreniche-del-garda-territorio-di-tradizioni-autentiche-125313-1-4b5e7352e6baaa3364be333a2851c1d8",
+        "event_page_url": "https://www.comune.guidizzolo.mn.it/notizie/Sagra-di-ottobre.html",
         "poster_url": "https://www.comune.goito.mn.it/it-it/immagine/img-125313-M2-28-1345-0-0-a6742aabacb5a9fd8daaded1a772320b",
         "type": "municipality_poster",
         "verified_at": "2026-07-17T21:15:00+02:00",
@@ -5488,8 +5488,11 @@
         "date_match": true,
         "verified_by": "Cama Enterprise Poster Scan OCR + source review",
         "evidence_note": "Calendario multi-evento 2026: Fiera della Quaglia, Guidizzolo, 3–4 ottobre.",
+        "retired_event_page_url": "https://www.comune.goito.mn.it/it-it/vivere-il-comune/eventi/colline-moreniche-del-garda-territorio-di-tradizioni-autentiche-125313-1-4b5e7352e6baaa3364be333a2851c1d8",
+        "retired_event_page_reason": "confirmed_http_404_2026_10_21",
+        "public_link_evidence_note": "Programma ufficiale della manifestazione 2026. Il Comune collega Fiera Mondiale della Quaglia e Sagra di ottobre (24 settembre–5 ottobre), indicando il clou il 3–4 ottobre. La Sagra della Quaglia AVIS è un sottoevento di asporto del 3–5 ottobre. Date canoniche 3–4 ottobre, identità e poster territoriale conservati; nessuna fusione con AVIS. Prove: research/quaglia_reconciliation_2026-10-21/REPORT.md.",
         "public_poster_url": "https://www.comune.goito.mn.it/it-it/immagine/img-125313-M2-28-1345-0-0-a6742aabacb5a9fd8daaded1a772320b",
-        "public_event_page_url": "https://www.comune.goito.mn.it/it-it/vivere-il-comune/eventi/colline-moreniche-del-garda-territorio-di-tradizioni-autentiche-125313-1-4b5e7352e6baaa3364be333a2851c1d8",
+        "public_event_page_url": "https://www.comune.guidizzolo.mn.it/notizie/Sagra-di-ottobre.html",
         "public_directions_url": null,
         "has_direct_poster": true,
         "has_event_details": true,
@@ -5981,7 +5984,7 @@
         "type": "primary_event_page",
         "poster_url": null,
         "public_poster_url": null,
-        "public_event_page_url": "https://www.comune.castelgoffredo.mn.it/it/news/111036/antica-fiera-di-san-luca-2026",
+        "public_event_page_url": "https://mantovanetweek.it/castel-goffredo/a-castel-goffredo-torna-lantica-fiera-di-san-luca/",
         "directions_url": null,
         "directions_query": null,
         "verified_at": "2026-10-15",
@@ -5992,14 +5995,18 @@
         "research_evidence_path": "03_projects/sagre_live_map/research/discovery_mantova_2026-10-15/CANDIDATE_EVIDENCE.json",
         "research_evidence_sha256": "87c623f1fe3d0ba25eb91b54d0ac68f605f0dd3dcbe530e52a69f7301f7da315",
         "research_candidate_id": "research-mn-20261015-a02",
+        "event_page_url": "https://mantovanetweek.it/castel-goffredo/a-castel-goffredo-torna-lantica-fiera-di-san-luca/",
+        "retired_event_page_url": "https://www.comune.castelgoffredo.mn.it/it/news/111036/antica-fiera-di-san-luca-2026",
+        "retired_event_page_reason": "2026-10-20: old municipal Details confirmed dead in production health; replacement is a healthy event-specific Mantova Netweek page for the same 18 October 2026 edition. Original source.url retained as provenance.",
+        "public_link_evidence_note": "Independent Jarvis review 2026-10-20: Mantova Netweek event-specific page matches Antica Fiera di San Luca, Castel Goffredo, 18 October 2026 and historic-centre program. Corroborated by current Comune di Castel Goffredo event content and Ordinanza 112/2026. Secondary territorial Details only; original municipal provenance and every semantic event field preserved.",
         "public_directions_url": null,
         "has_direct_poster": false,
         "has_event_details": true,
         "has_verified_directions": false,
-        "primary_action_url": "https://www.comune.castelgoffredo.mn.it/it/news/111036/antica-fiera-di-san-luca-2026",
+        "primary_action_url": "https://mantovanetweek.it/castel-goffredo/a-castel-goffredo-torna-lantica-fiera-di-san-luca/",
         "primary_action_label": "Dettagli evento",
         "has_public_action": true,
-        "preferred_url": "https://www.comune.castelgoffredo.mn.it/it/news/111036/antica-fiera-di-san-luca-2026"
+        "preferred_url": "https://mantovanetweek.it/castel-goffredo/a-castel-goffredo-torna-lantica-fiera-di-san-luca/"
       },
       "verification_status": "verified",
       "event_status": "confirmed"
