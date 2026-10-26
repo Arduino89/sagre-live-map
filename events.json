@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-21T10:45:00+02:00",
-  "asOf": "2026-10-21",
+  "generatedAt": "2026-10-26T17:54:26+00:00",
+  "asOf": "2026-10-26",
   "events": [
     {
       "id": "burger-fest-avis-quingentole-2026",
@@ -6231,6 +6231,79 @@
         "primary_action_url": null,
         "primary_action_label": "Link evento specifico non disponibile",
         "has_public_action": false
+      },
+      "verification_status": "verified",
+      "event_status": "confirmed"
+    },
+    {
+      "id": "notte-delle-lumere-suzzara-2026-10-31",
+      "title": "Notte delle Lumere 2026",
+      "category": "sagra",
+      "start_date": "2026-10-31",
+      "end_date": "2026-10-31",
+      "time_text": "Orario da confermare: discordanza fra pagina evento acquisita e locandina; nessun orario scelto.",
+      "venue": "Piazza Garibaldi",
+      "municipality": "Suzzara",
+      "province": "MN",
+      "latitude": 44.99187,
+      "longitude": 10.74309,
+      "location_precision": "municipality_centroid",
+      "location_note": "Coordinate amministrative ADM3 del Comune; fallback del marker, non sede puntuale. Nessuna Indicazione.",
+      "location_evidence": {
+        "latitude": 44.99187,
+        "longitude": 10.74309,
+        "location_precision": "municipality_centroid",
+        "sourceUrl": "https://www.geonames.org/6540649/suzzara.html",
+        "geonameId": "6540649",
+        "evidence_path": "03_projects/sagre_live_map/research/discovery_mantova_2026-10-17/CANDIDATE_EVIDENCE.json"
+      },
+      "summary": "Festa comunitaria delle Lumere a Suzzara, il 31 ottobre 2026 in Piazza Garibaldi, con trattori mascherati, giochi, animazioni e gastronomia. Orario da confermare presso l’organizzatore.",
+      "tags": [
+        "festa_tradizionale",
+        "Suzzara",
+        "2026"
+      ],
+      "relevance": {
+        "classification": "sagra",
+        "verified": true,
+        "evidence": "Tradizione comunitaria locale con corteo, animazione e gastronomia, coerente con la descrizione del registro regionale; non inclusione dal solo tema Halloween."
+      },
+      "source": {
+        "name": "organizer_primary",
+        "url": "https://www.suzzaraproloco.it/events/la-notte-delle-lumere-3",
+        "type": "organizer",
+        "poster_url": "https://static.wixstatic.com/media/07ba2a_687687c98d4144dc928b7fe45558416e~mv2.jpeg",
+        "public_event_page_url": "https://www.suzzaraproloco.it/events/la-notte-delle-lumere-3",
+        "directions_url": null,
+        "directions_query": null,
+        "verified_at": "2026-10-26",
+        "title_match": true,
+        "date_match": true,
+        "verified_by": "Jarvis — review dei contenuti archiviati e registro corrente; proposta non ammessa",
+        "evidence_note": "Registro regionale osservato dallo scanner il 26/10/2026; pagina organizzatore documentata il 17/10 e JPEG archiviato ispezionato visivamente il 26/10: anno 2026, 31 ottobre, Piazza Garibaldi/Suzzara. Stesso asset e OCR senza nuova estrazione; gate corretto il 19/10 rieseguito. Pagina acquisita 16:00 e poster 17:00 discordanti, nessun orario pubblico scelto. Raggiungibilità HTTP corrente non certificata: web cache miss, non 404 accertato.",
+        "research_evidence_path": "03_projects/sagre_live_map/research/queue_reconciliation_2026-10-26/REPORT.md",
+        "research_candidate_id": "research-mn-20261017-k02",
+        "poster_semantic_verification": {
+          "status": "POSTER_VERIFIED",
+          "visual_confirmation": true,
+          "title_match": true,
+          "date_match": true,
+          "place_match": true,
+          "current_edition": true,
+          "asset_sha256": "ba1a81c75f3905c03dbf2a95198467174fd825d5ac9fa707e69c6827e272ce22",
+          "reviewed_at": "2026-10-26",
+          "evidence_path": "03_projects/sagre_live_map/research/discovery_mantova_2026-10-17/evidence/suzzara-lumere-2026.jpeg",
+          "transport_verified_today": false
+        },
+        "public_poster_url": "https://static.wixstatic.com/media/07ba2a_687687c98d4144dc928b7fe45558416e~mv2.jpeg",
+        "public_directions_url": null,
+        "has_direct_poster": true,
+        "has_event_details": true,
+        "has_verified_directions": false,
+        "primary_action_url": "https://static.wixstatic.com/media/07ba2a_687687c98d4144dc928b7fe45558416e~mv2.jpeg",
+        "primary_action_label": "Apri locandina",
+        "has_public_action": true,
+        "preferred_url": "https://static.wixstatic.com/media/07ba2a_687687c98d4144dc928b7fe45558416e~mv2.jpeg"
       },
       "verification_status": "verified",
       "event_status": "confirmed"
