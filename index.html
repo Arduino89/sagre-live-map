@@ -484,7 +484,7 @@
       <div id="map" aria-label="Mappa degli eventi verificati"></div>
       <div class="map-overlay">
         <strong id="mapTitle">Tutte le zone</strong>
-        <span id="mapStatus">2 sagre e fiere confermate · dati aggiornati al 26 ottobre 2026</span>
+        <span id="mapStatus">2 sagre e fiere confermate · dati aggiornati al 28 ottobre 2026</span>
       </div>
     </section>
   </div>
@@ -596,6 +596,7 @@
       return new Intl.DateTimeFormat("it-IT", {day:"numeric", month:"short"}).format(new Date(event.source.verified_at));
     }
     function directions(event) {
+      if (event.location_precision === "municipality_centroid" || event.location_precision === "locality_centroid") return "";
       return (event.source && event.source.public_directions_url) || "";
     }
     function publicActionLinks(event) {
@@ -610,7 +611,7 @@
       if (source.public_event_page_url && source.public_event_page_url !== source.public_poster_url) {
         parts.push(link(source.public_event_page_url, "Dettagli evento"));
       }
-      if (source.public_directions_url) {
+      if (source.public_directions_url && event.location_precision !== "municipality_centroid" && event.location_precision !== "locality_centroid") {
         parts.push(link(source.public_directions_url, "Indicazioni"));
       }
       return parts.length
@@ -621,10 +622,17 @@
       if (event.location_precision === "municipality_centroid") {
         return "Punto indicativo nel centro del comune";
       }
-      if (event.location_precision === "venue_approximate") {
+      if (event.location_precision === "locality_centroid") {
+        return "Centro indicativo della località";
+      }
+      if (event.location_precision === "venue_approximate" || event.location_precision === "venue_area_approximate") {
         return "Posizione approssimativa della sede";
       }
-      return "Sede verificata";
+      if (event.location_precision === "street_approximate") {
+        return "Posizione indicativa lungo la strada";
+      }
+      if (event.location_precision === "venue_exact") return "Sede verificata";
+      return "Precisione della posizione da verificare";
     }
     function resultSet() {
       var results = data.filter(function (event) {
@@ -693,7 +701,7 @@
       document.getElementById("resultLabel").textContent =
         activeResults.length + " risultati entro " + selectedRadius() + " km da " + searchReference.label;
       document.getElementById("mapStatus").textContent =
-        activeResults.length + " risultati della vista · " + viewportResults.length + " marker nell'inquadratura · dati aggiornati al 26 ottobre 2026";
+        activeResults.length + " risultati della vista · " + viewportResults.length + " marker nell'inquadratura · dati aggiornati al 28 ottobre 2026";
     }
     function renderEventList(results) {
       var list = document.getElementById("events");
@@ -1102,6 +1110,7 @@
 .review-status-chip.reviewed-ok { color:#145c3a; background:#dff1e7; }
 .review-status-chip.review-needed { color:#715500; background:#fff1b8; }
 .review-status-chip.evidence-only { color:#842e2a; background:#f8d9d7; }
+.review-status-chip.catalog-entry { color:var(--muted); background:rgba(24,35,29,.06); }
 .review-status-reason { color:var(--muted); font-size:10px; line-height:1.35; }
 .pin.reviewed-ok { background:#2f865d; }
 .pin.review-needed { background:#d4a72c; }
@@ -1136,30 +1145,35 @@
   "use strict";
   var registry = {"asOf":"2026-09-11","defaultCanonicalReason":"Evento canonico: revisione indipendente Jarvis dello stato corrente non ancora registrata.","defaultCanonicalStatus":"review_needed","items":[{"canonicalEventId":"verified-sorbara-cotechino-2026","endDate":"2026-08-29","key":"canonical:verified-sorbara-cotechino-2026","locality":"Sorbara","municipality":"Asola","reason":"Review indipendente positiva e closure gate completato; evento ora canonico.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #387 canonical admission","sourceUrl":"https://www.comune.asola.mn.it/vivere-il-comune/eventi/sagra-del-cotechino-3/","startDate":"2026-08-28","status":"reviewed_ok","title":"Sagra del Cotechino — Sorbara di Asola"},{"canonicalEventId":"verified-sabbioneta-oratorio-2026","endDate":"2026-09-13","key":"canonical:verified-sabbioneta-oratorio-2026","municipality":"Sabbioneta","reason":"Review indipendente positiva e closure gate completato; evento ora canonico.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #387 canonical admission","sourceUrl":"https://www.comune.sabbioneta.mn.it/it/news/festa-delloratorio-2026-tre-giorni-di-condivisione-e-divertimento-a-sabbioneta","startDate":"2026-09-11","status":"reviewed_ok","title":"Festa dell’Oratorio di Sabbioneta"},{"canonicalEventId":"verified-borgoforte-2026","endDate":"2026-08-30","key":"canonical:verified-borgoforte-2026","locality":"Borgoforte","municipality":"Borgo Virgilio","reason":"Review indipendente positiva e closure gate completato; evento ora canonico.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #387 canonical admission","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260826-sagra-san-giovanni-battista-2026-borgoforte.php","startDate":"2026-08-28","status":"reviewed_ok","title":"Sagra di San Giovanni Battista — Borgoforte"},{"canonicalEventId":"verified-cappelletta-2026","endDate":"2026-09-13","key":"canonical:verified-cappelletta-2026","locality":"Cappelletta","municipality":"Borgo Virgilio","reason":"Review indipendente positiva e closure gate completato; date reali 5–6 e 11–13 settembre, non intervallo continuo.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #387 canonical admission","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260805-festa-di-turtei-2026-cappelletta-di-borgo-virgilio.php","startDate":"2026-09-05","status":"reviewed_ok","title":"Festa di Turtei — Cappelletta"},{"canonicalEventId":"verified-san-pio-2026","endDate":"2026-09-06","key":"canonical:verified-san-pio-2026","locality":"San Pio X","municipality":"Mantova","reason":"Review indipendente positiva e closure gate completato; evento ora canonico.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #387 canonical admission","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260826-festa-in-san-pio-mantova-2026.php","startDate":"2026-09-03","status":"reviewed_ok","title":"Festa in San Pio — Parrocchia San Pio X"},{"canonicalEventId":"verified-villa-saviola-2026","endDate":"2026-09-27","key":"canonical:verified-villa-saviola-2026","locality":"Villa Saviola","municipality":"Motteggiana","reason":"Review indipendente positiva e closure gate completato; programma corrente confermato, nessuna cancellazione corrente trovata.","reviewedAt":"2026-09-11","reviewedBy":"Jarvis","sourceReceipt":"Issue #386 / PR #387 canonical admission","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260901-festa-autunno-2026-villa-saviola.php","startDate":"2026-09-25","status":"reviewed_ok","title":"Festa d’Autunno — Villa Saviola"},{"candidateId":"calendar-event-356bb7bd9c1df5e6","endDate":"2026-09-06","key":"candidate:calendar-event-356bb7bd9c1df5e6","locality":"Cereta","municipality":"Volta Mantovana","reason":"Candidato già esistente arricchito con località Cereta; mapping canonico ancora da riesaminare senza creare duplicati.","sourceReceipt":"PR #385 candidate enrichment / PR #387 HOLD","sourceUrl":"https://www.mantovanotizie.com/feste-sagre/20260824-festa-del-capunsel-2026-cereta-volta-mantovana.php","startDate":"2026-09-04","status":"review_needed","title":"Festa del capunsèl — Cereta"}],"schemaVersion":1};
   var labels = {
+    catalog_entry: "Nel catalogo",
     reviewed_ok: "🟢 Revisionato Jarvis",
     review_needed: "🟡 In revisione",
     evidence_only: "🔴 Evidenza preliminare"
   };
-  var canonical = Object.create(null);
   var overlayItems = [];
 
   (registry.items || []).forEach(function (item) {
-    if (item.canonicalEventId) canonical[String(item.canonicalEventId)] = item;
     if (!item.canonicalEventId) overlayItems.push(item);
   });
 
   function statusClass(status) {
-    return status === "reviewed_ok" ? "reviewed-ok" :
+    return status === "catalog_entry" ? "catalog-entry" :
+      status === "reviewed_ok" ? "reviewed-ok" :
       status === "evidence_only" ? "evidence-only" : "review-needed";
   }
 
   function statusForEvent(event) {
-    var explicit = canonical[String(event.id || "")];
-    if (explicit) return explicit;
+    // Presence in the served catalog is distinct from editorial review and
+    // release certification. The historic registry cannot override this fact.
+    var id = String(event.id || "");
+    if (id && Array.isArray(window.data) && window.data.some(function (item) {
+      return String(item.id || "") === id;
+    })) {
+      return {status: "catalog_entry", reason: "Presente nel catalogo caricato."};
+    }
     return {
-      status: registry.defaultCanonicalStatus || "review_needed",
-      reason: registry.defaultCanonicalReason ||
-        "Evento canonico: revisione indipendente Jarvis non ancora registrata."
+      status: "review_needed",
+      reason: "Scheda non presente nel catalogo caricato."
     };
   }
 
@@ -1201,14 +1215,14 @@
       "date in review";
     return '<div class="popup"><b>' + esc(item.title || item.key) + '</b>' +
       statusMarkup(item) +
-      '<span><strong>NON CANONICO · lavoro in corso</strong><br>' +
+      '<span><strong>NON CANONICO NELLO SNAPSHOT · ' + esc(registry.asOf || "non datato") + '</strong><br>' +
       esc(place) + '<br>' + esc(dates) + '</span><br>' +
       sourceLinkForItem(item) + '</div>';
   }
 
   function reviewOverlayEnabled() {
     var toggle = document.getElementById("reviewOverlayToggle");
-    return !toggle || toggle.checked;
+    return !!toggle && toggle.checked;
   }
 
   function renderReviewOverlay() {
@@ -1241,11 +1255,11 @@
         String(a.title || a.key).localeCompare(String(b.title || b.key));
     });
     document.getElementById("reviewLabel").textContent =
-      items.length + " elementi non canonici · non contano nel catalogo";
+      items.length + " elementi storici non canonici · snapshot " + String(registry.asOf || "non datato") + " · non contano nel catalogo";
     if (!items.length) {
       container.innerHTML =
-        '<div class="empty"><strong>Nessun elemento non canonico in review.</strong>' +
-        '<span>I marker colorati del catalogo restano comunque legati allo stato di revisione.</span></div>';
+        '<div class="empty"><strong>Nessun elemento nello snapshot storico.</strong>' +
+        '<span>Il catalogo caricato è distinto da questo archivio di ricerca.</span></div>';
       return;
     }
     items.forEach(function (item) {
@@ -1254,7 +1268,7 @@
       var place = [item.locality, item.municipality].filter(Boolean).join(" · ");
       card.innerHTML = '<strong>' + esc(item.title || item.key) + '</strong>' +
         statusMarkup(item) +
-        '<span class="review-meta">NON CANONICO · ' + esc(place || "geografia da review") + '</span>' +
+        '<span class="review-meta">NON CANONICO NELLO SNAPSHOT · ' + esc(place || "geografia da review") + '</span>' +
         sourceLinkForItem(item);
       container.appendChild(card);
     });
@@ -1264,9 +1278,6 @@
     var source = event && event.source || {};
     var parts = [];
     var seen = Object.create(null);
-    var publicUrls = Object.create(null);
-    [source.public_poster_url, source.public_event_page_url, source.public_directions_url]
-      .filter(Boolean).forEach(function (url) { publicUrls[String(url)] = true; });
     function add(url, label) {
       if (!url) return;
       var key = String(url);
@@ -1275,12 +1286,13 @@
       parts.push('<a href="' + esc(key) + '" target="_blank" rel="noreferrer">' +
         label + ' ↗</a>');
     }
-    if (source.url && !publicUrls[String(source.url)]) {
-      add(source.url, "Fonte verifica");
-    }
+    // Provenance remains in the data; only the three reviewed public roles
+    // become event buttons. Generic registry/homepage fallback is not a role.
     add(source.public_poster_url, "Locandina");
     add(source.public_event_page_url, "Dettagli evento");
-    add(source.public_directions_url, "Indicazioni");
+    if (event.location_precision !== "municipality_centroid" && event.location_precision !== "locality_centroid") {
+      add(source.public_directions_url, "Indicazioni");
+    }
     return parts.length ? parts.join("") :
       '<span class="link-unavailable">Collegamenti pubblici non disponibili</span>';
   };
@@ -1329,10 +1341,8 @@
     legend.className = "review-legend";
     legend.id = "reviewLegend";
     legend.innerHTML =
-      '<div class="review-legend-line"><span class="review-dot green"></span><span>Revisionato Jarvis</span></div>' +
-      '<div class="review-legend-line"><span class="review-dot yellow"></span><span>In revisione</span></div>' +
-      '<div class="review-legend-line"><span class="review-dot red"></span><span>Evidenza preliminare</span></div>' +
-      '<label class="review-toggle"><input id="reviewOverlayToggle" type="checkbox" checked> Mostra ricerca non canonica</label>';
+      '<div class="review-legend-line"><span>Nel catalogo · dati caricati dalla mappa</span></div>' +
+      '<label class="review-toggle"><input id="reviewOverlayToggle" type="checkbox"> Mostra snapshot storico non canonico</label>';
     overlay.appendChild(legend);
     document.getElementById("reviewOverlayToggle").addEventListener("change", renderReviewOverlay);
   }
@@ -1346,7 +1356,7 @@
     var heading = document.createElement("div");
     heading.className = "result-heading";
     heading.innerHTML =
-      '<h2>Stato revisione</h2><span id="reviewLabel">caricamento…</span>';
+      '<h2>Archivio di ricerca</h2><span id="reviewLabel">caricamento…</span>';
     var list = document.createElement("div");
     list.className = "monitoring";
     list.id = "reviewItems";
@@ -1362,7 +1372,7 @@
   renderReviewList();
 
   var toggle = document.getElementById("reviewOverlayToggle");
-  if (toggle) toggle.checked = true;
+  if (toggle) toggle.checked = false;
 
   if (Array.isArray(window.data) && window.data.length) {
     render();
